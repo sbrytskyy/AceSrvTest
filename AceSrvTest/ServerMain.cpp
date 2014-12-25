@@ -40,12 +40,16 @@ int ACE_TMAIN(int, ACE_TCHAR *[])
 
 		ACE_InputCDR icdr(io_vec->iov_base, io_vec->iov_len);
 
+		const ACE_Message_Block * mblk = icdr.start();
+
+		//ACE::write_n(ACE_STDOUT, mblk->rd_ptr(), mblk->length());
+		std::string message(mblk->rd_ptr(), mblk->length());
+		std::cout << "mblk->length(): " << mblk->length() << ", message: " << message << std::endl;
+
 		User user2;
 		User::unmarshall(icdr, user2);
 
 		std::cout << "[RECEIVED] user=[pid: " << user2.getPid() << ", name: " << user2.getName() << "]" << std::endl;
-
-		//ACE_Message_Block * mb = icdr.steal_contents();
 
 		delete[] io_vec->iov_base;
 		delete io_vec;
