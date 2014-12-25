@@ -25,6 +25,7 @@ int ACE_TMAIN(int, ACE_TCHAR *[])
 	for (;;)
 	{
 		if (acceptor.accept(peer) == -1) return 1;
+		peer.disable(ACE_NONBLOCK);
 
 		//char buf[1024];
 
@@ -37,18 +38,14 @@ int ACE_TMAIN(int, ACE_TCHAR *[])
 		ACE::write_n(ACE_STDOUT, io_vec->iov_base, io_vec->iov_len);
 		std::cout << "]" << std::endl;
 
-
 		ACE_InputCDR icdr(io_vec->iov_base, io_vec->iov_len);
 
-
 		User user2;
-
-		std::cout << "1. user pid: " << user2.getPid() << ", name: " << user2.getName() << std::endl;
-
 		User::unmarshall(icdr, user2);
 
-		std::cout << "2. user pid: " << user2.getPid() << ", name: " << user2.getName() << std::endl;
-		//std::cout << "[RECEIVED] n: " << iovec[0]->iov_len << std::endl;
+		std::cout << "[RECEIVED] user=[pid: " << user2.getPid() << ", name: " << user2.getName() << "]" << std::endl;
+
+		//ACE_Message_Block * mb = icdr.steal_contents();
 
 		delete[] io_vec->iov_base;
 		delete io_vec;
