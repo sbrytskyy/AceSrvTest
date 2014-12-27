@@ -18,8 +18,8 @@ public:
 	void setName(std::string _name) { name = _name; }
 	void setName(char* _name) { name.assign(_name); }
 
-	static int marshall(ACE_OutputCDR& cdr, User& user);
-	static int unmarshall(ACE_InputCDR& cdr, User& user);
+	static int writeExternal(ACE_OutputCDR& cdr, User& user);
+	static int readExternal(ACE_InputCDR& cdr, User& user);
 
 private:
 	long lPid;

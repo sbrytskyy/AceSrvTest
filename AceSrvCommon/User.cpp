@@ -1,7 +1,7 @@
 #include "User.h"
 
 
-int User::marshall(ACE_OutputCDR& cdr, User& user) 
+int User::writeExternal(ACE_OutputCDR& cdr, User& user) 
 {
 	cdr << ACE_CDR::Long(user.getPid());
 	
@@ -11,7 +11,7 @@ int User::marshall(ACE_OutputCDR& cdr, User& user)
 	return cdr.good_bit();
 }
 
-int User::unmarshall(ACE_InputCDR& cdr, User& user)
+int User::readExternal(ACE_InputCDR& cdr, User& user)
 {
 	ACE_CDR::Long pid;
 	cdr >> pid;
