@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 2013
 VisualStudioVersion = 12.0.31101.0
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "AceSrvTest", "AceSrvTest\AceSrvTest.vcxproj", "{2A326DC3-97DD-4679-8C9A-FC820773C45B}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "AceClient", "AceClient\AceClient.vcxproj", "{61C93A32-2ABF-439F-B269-689E4D77A197}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "AceSrvCommon", "AceSrvCommon\AceSrvCommon.vcxproj", "{47292A5A-2716-45DC-8A50-E667D6FFF448}"
 EndProject
@@ -13,10 +13,10 @@ Global
 		Release|Win32 = Release|Win32
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{2A326DC3-97DD-4679-8C9A-FC820773C45B}.Debug|Win32.ActiveCfg = Debug|Win32
-		{2A326DC3-97DD-4679-8C9A-FC820773C45B}.Debug|Win32.Build.0 = Debug|Win32
-		{2A326DC3-97DD-4679-8C9A-FC820773C45B}.Release|Win32.ActiveCfg = Release|Win32
-		{2A326DC3-97DD-4679-8C9A-FC820773C45B}.Release|Win32.Build.0 = Release|Win32
+		{61C93A32-2ABF-439F-B269-689E4D77A197}.Debug|Win32.ActiveCfg = Debug|Win32
+		{61C93A32-2ABF-439F-B269-689E4D77A197}.Debug|Win32.Build.0 = Debug|Win32
+		{61C93A32-2ABF-439F-B269-689E4D77A197}.Release|Win32.ActiveCfg = Release|Win32
+		{61C93A32-2ABF-439F-B269-689E4D77A197}.Release|Win32.Build.0 = Release|Win32
 		{47292A5A-2716-45DC-8A50-E667D6FFF448}.Debug|Win32.ActiveCfg = Debug|Win32
 		{47292A5A-2716-45DC-8A50-E667D6FFF448}.Debug|Win32.Build.0 = Debug|Win32
 		{47292A5A-2716-45DC-8A50-E667D6FFF448}.Release|Win32.ActiveCfg = Release|Win32

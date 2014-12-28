@@ -7,22 +7,22 @@
 class User
 {
 public:
-	User() : lPid(-1) {};
-	User(long _lPid, std::string _name) : lPid(_lPid), name(_name) {};
+	User() : m_lPid(-1) {};
+	User(long _lPid, std::string _name) : m_lPid(_lPid), m_Name(_name) {};
 	virtual ~User() {};
 
-	std::string& getName() { return name; }
-	long getPid() const { return lPid; }
+	const std::string& name(void) { return m_Name; }
+	const long pid(void) const { return m_lPid; }
 
-	void setPid(long _lPid) { lPid = _lPid; }
-	void setName(std::string _name) { name = _name; }
-	void setName(char* _name) { name.assign(_name); }
+	void pid(long _lPid) { m_lPid = _lPid; }
+	void name(std::string _name) { m_Name = _name; }
+	void name(char* _name) { m_Name.assign(_name); }
 
 	static int writeExternal(ACE_OutputCDR& cdr, User& user);
 	static int readExternal(ACE_InputCDR& cdr, User& user);
 
 private:
-	long lPid;
-	std::string name;
+	long m_lPid;
+	std::string m_Name;
 };
 

@@ -47,9 +47,9 @@ int ACE_TMAIN(int, ACE_TCHAR *[])
 		std::cout << "mblk->length(): " << mblk->length() << ", message: " << message << std::endl;
 
 		User user2;
-		User::unmarshall(icdr, user2);
+		User::readExternal(icdr, user2);
 
-		std::cout << "[RECEIVED] user=[pid: " << user2.getPid() << ", name: " << user2.getName() << "]" << std::endl;
+		std::cout << "[RECEIVED] user=[pid: " << user2.pid() << ", name: " << user2.name() << "]" << std::endl;
 
 		delete[] io_vec->iov_base;
 		delete io_vec;
