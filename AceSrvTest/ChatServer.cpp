@@ -1,5 +1,7 @@
 #include "ChatServer.h"
 
+#include "ace/Log_Msg.h"
+
 #include <iostream>
 #include <string>
 
@@ -19,34 +21,46 @@ ChatServer::~ChatServer()
 int ChatServer::run()
 {
 	if (this->open())
-		return -1;
+		return GENERAL_ERROR;
 
 	for (;;) {
-		if (wait_for_multiple_events() == -1)
-			return -1;
-		if (handle_connections() == -1)
-			return -1;
-		if (handle_data() == -1)
-			return -1;
+		if (wait_for_multiple_events() == GENERAL_ERROR)
+			return GENERAL_ERROR;
+		if (handle_connections() == GENERAL_ERROR)
+			return GENERAL_ERROR;
+		if (handle_data() == GENERAL_ERROR)
+			return GENERAL_ERROR;
 	}
 
-	ACE_NOTREACHED(return 0;)
+	ACE_NOTREACHED( return 0; )
 }
 
 int ChatServer::open()
 {
-	if (server_addr.set(SERVER_PORT) == -1) return 1;
-	if (acceptor.open(server_addr) == -1) return 1;
+	if (server_addr.set(SERVER_PORT) == GENERAL_ERROR)
+	{
+		ACE_ERROR_RETURN((LM_ERROR, "%p; server port: %n\n", "server_addr.set()", SERVER_PORT), GENERAL_ERROR);
+	}
+	int result = acceptor.open(server_addr);
+	if (result == GENERAL_ERROR)
+	{
+		ACE_ERROR_RETURN((LM_ERROR, "%p\n", "acceptor.open()"), GENERAL_ERROR);
+	}
 
-	return 0;
+	return result;
 }
 
 int ChatServer::handle_connections()
 {
-	if (acceptor.accept(peer) == -1) return 1;
+	int result = acceptor.accept(peer);
+	if (result == GENERAL_ERROR)
+	{
+		ACE_ERROR_RETURN((LM_ERROR, "%p\n", "acceptor.accept()"), GENERAL_ERROR);
+	}
+
 	peer.disable(ACE_NONBLOCK);
 
-	return 0;
+	return result;
 }
 
 int ChatServer::handle_data()

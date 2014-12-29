@@ -72,11 +72,9 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="ChatServer.cpp" />
     <ClCompile Include="User.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="ChatServer.h" />
     <ClInclude Include="config.h" />
     <ClInclude Include="User.h" />
   </ItemGroup>
