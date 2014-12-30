@@ -1,9 +1,10 @@
 #pragma once
 
-#include "ace/ACE.h"
+#include <ace/ACE.h>
 #include <ace/INET_Addr.h>
 #include <ace/SOCK_Acceptor.h>
 #include <ace/SOCK_Stream.h>
+#include <ace/CDR_Stream.h>
 
 #include "config.h"
 
@@ -21,6 +22,10 @@ protected:
 
 private:
 	int open();
+
+	void dumpMessage(iovec * io_vec, bool incoming);
+	void extractMessageBlock(ACE_InputCDR& icdr);
+	void sendResponse(long code);
 
 	ACE_INET_Addr server_addr;
 	ACE_SOCK_Acceptor acceptor;

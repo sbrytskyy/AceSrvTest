@@ -1,11 +1,11 @@
-#include "ChatServer.h"
-
-#include "ace/Log_Msg.h"
+#include <ace/Log_Msg.h>
 
 #include <iostream>
 #include <string>
 
+#include "ChatServer.h"
 #include "User.h"
+#include "Status.h"
 
 ChatServer::ChatServer()
 {
@@ -21,15 +21,16 @@ ChatServer::~ChatServer()
 int ChatServer::run()
 {
 	if (this->open())
-		return GENERAL_ERROR;
+		return EXIT_FAILURE;
 
-	for (;;) {
-		if (wait_for_multiple_events() == GENERAL_ERROR)
-			return GENERAL_ERROR;
-		if (handle_connections() == GENERAL_ERROR)
-			return GENERAL_ERROR;
-		if (handle_data() == GENERAL_ERROR)
-			return GENERAL_ERROR;
+	for (;;)
+	{
+		if (wait_for_multiple_events() == EXIT_FAILURE)
+			return EXIT_FAILURE;
+		if (handle_connections() == EXIT_FAILURE)
+			return EXIT_FAILURE;
+		if (handle_data() == EXIT_FAILURE)
+			return EXIT_FAILURE;
 	}
 
 	ACE_NOTREACHED( return 0; )
@@ -37,14 +38,14 @@ int ChatServer::run()
 
 int ChatServer::open()
 {
-	if (server_addr.set(SERVER_PORT) == GENERAL_ERROR)
+	if (server_addr.set(SERVER_PORT) == EXIT_FAILURE)
 	{
-		ACE_ERROR_RETURN((LM_ERROR, "%p; server port: %n\n", "server_addr.set()", SERVER_PORT), GENERAL_ERROR);
+		ACE_ERROR_RETURN((LM_ERROR, "%p; server port: %n\n", "server_addr.set()", SERVER_PORT), EXIT_FAILURE);
 	}
 	int result = acceptor.open(server_addr);
-	if (result == GENERAL_ERROR)
+	if (result == EXIT_FAILURE)
 	{
-		ACE_ERROR_RETURN((LM_ERROR, "%p\n", "acceptor.open()"), GENERAL_ERROR);
+		ACE_ERROR_RETURN((LM_ERROR, "%p\n", "acceptor.open()"), EXIT_FAILURE);
 	}
 
 	return result;
@@ -53,9 +54,9 @@ int ChatServer::open()
 int ChatServer::handle_connections()
 {
 	int result = acceptor.accept(peer);
-	if (result == GENERAL_ERROR)
+	if (result == EXIT_FAILURE)
 	{
-		ACE_ERROR_RETURN((LM_ERROR, "%p\n", "acceptor.accept()"), GENERAL_ERROR);
+		ACE_ERROR_RETURN((LM_ERROR, "%p\n", "acceptor.accept()"), EXIT_FAILURE);
 	}
 
 	peer.disable(ACE_NONBLOCK);
@@ -65,32 +66,69 @@ int ChatServer::handle_connections()
 
 int ChatServer::handle_data()
 {
-	//char buf[1024];
-
-	//ACE_Message_Block *messageBlock = new ACE_Message_Block(ACE_DEFAULT_CDR_BUFSIZE);
-
 	iovec *io_vec = new iovec();
 	int n = peer.recvv(io_vec);
 
-	std::cout << "[RECEIVED] io_vec->iov_len: " << io_vec->iov_len << ", io_vec->iov_base:[";
-	ACE::write_n(ACE_STDOUT, io_vec->iov_base, io_vec->iov_len);
-	std::cout << "]" << std::endl;
+	dumpMessage(io_vec, true);
 
 	ACE_InputCDR icdr(io_vec->iov_base, io_vec->iov_len);
+
+	User user;
+	User::readExternal(icdr, user);
+
+	std::cout << "[RECEIVED] user=[pid: " << user.pid() << ", name: " << user.name() << "]" << std::endl;
+
+	delete[] io_vec->iov_base;
+	delete io_vec;
+
+	sendResponse(0);
+
+	return 0;
+}
+
+void ChatServer::extractMessageBlock(ACE_InputCDR& icdr)
+{
+	//ACE_Message_Block *messageBlock = new ACE_Message_Block(ACE_DEFAULT_CDR_BUFSIZE);
 
 	const ACE_Message_Block * mblk = icdr.start();
 
 	//ACE::write_n(ACE_STDOUT, mblk->rd_ptr(), mblk->length());
 	std::string message(mblk->rd_ptr(), mblk->length());
 	std::cout << "mblk->length(): " << mblk->length() << ", message: " << message << std::endl;
+}
 
-	User user2;
-	User::readExternal(icdr, user2);
+void ChatServer::sendResponse(long code)
+{
+	ACE_OutputCDR ocdr;
 
-	std::cout << "[RECEIVED] user=[pid: " << user2.pid() << ", name: " << user2.name() << "]" << std::endl;
+	Status status(code);
+	Status::writeExternal(ocdr, status);
 
-	delete[] io_vec->iov_base;
+	iovec *io_vec = new iovec();
+	io_vec->iov_base = ocdr.begin()->rd_ptr();
+	io_vec->iov_len = ocdr.length();
+
+	dumpMessage(io_vec, false);
+
+	if (peer.sendv(io_vec, 1) == -1)
+	{
+		std::cerr << "Error sending data." << std::endl;
+	}
+
 	delete io_vec;
+}
 
-	return 0;
+void ChatServer::dumpMessage(iovec * io_vec, bool incoming)
+{
+	if (incoming)
+	{
+		std::cout << "[RECEIVE] ";
+	}
+	else
+	{
+		std::cout << "[SEND] ";
+	}
+	std::cout << "io_vec->iov_len: " << io_vec->iov_len << ", io_vec->iov_base:[";
+	ACE::write_n(ACE_STDOUT, io_vec->iov_base, io_vec->iov_len);
+	std::cout << "]" << std::endl;
 }

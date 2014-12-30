@@ -6,6 +6,7 @@
 #include <iostream>
 
 #include "User.h"
+#include "Status.h"
 #include "config.h"
 
 void test()
@@ -23,6 +24,21 @@ void test()
 	User::readExternal(icdr, user2);
 
 	std::cout << "2. user pid: " << user2.pid() << ", name: " << user2.name() << std::endl;
+}
+
+void dumpMessage(iovec * io_vec, bool incoming)
+{
+	if (incoming)
+	{
+		std::cout << "[RECEIVE] ";
+	}
+	else
+	{
+		std::cout << "[SEND] ";
+	}
+	std::cout << "io_vec->iov_len: " << io_vec->iov_len << ", io_vec->iov_base:[";
+	ACE::write_n(ACE_STDOUT, io_vec->iov_base, io_vec->iov_len);
+	std::cout << "]" << std::endl;
 }
 
 void runClient()
@@ -53,9 +69,7 @@ void runClient()
 	io_vec->iov_base = ocdr.begin()->rd_ptr();
 	io_vec->iov_len = ocdr.length();
 
-	std::cout << "[SEND] io_vec->iov_len: " << io_vec->iov_len << ", io_vec->iov_base:[";
-	ACE::write_n(ACE_STDOUT, io_vec->iov_base, io_vec->iov_len);
-	std::cout << "]" << std::endl;
+	dumpMessage(io_vec, false);
 
 	if (peer.sendv(io_vec, 1) == -1)
 	{
@@ -67,6 +81,21 @@ void runClient()
 	ACE::write_n(ACE_STDOUT, buf, n);
 	}*/
 
+	delete io_vec;
+
+	io_vec = new iovec();
+	int n = peer.recvv(io_vec);
+
+	dumpMessage(io_vec, true);
+
+	ACE_InputCDR icdr(io_vec->iov_base, io_vec->iov_len);
+
+	Status status;
+	Status::readExternal(icdr, status);
+
+	std::cout << "[RECEIVED] status=[status: " << status.code() << "]" << std::endl;
+
+	delete[] io_vec->iov_base;
 	delete io_vec;
 
 	peer.close();
