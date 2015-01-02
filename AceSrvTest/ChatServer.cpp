@@ -74,7 +74,7 @@ int ChatServer::handle_data()
 	ACE_InputCDR icdr(io_vec->iov_base, io_vec->iov_len);
 
 	User user;
-	User::readExternal(icdr, user);
+	icdr >> user;
 
 	std::cout << "[RECEIVED] user=[pid: " << user.pid() << ", name: " << user.name() << "]" << std::endl;
 

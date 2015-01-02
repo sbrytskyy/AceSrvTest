@@ -14,14 +14,14 @@ void test()
 	User user1(11, "uranium");
 	ACE_OutputCDR ocdr;
 
-	User::writeExternal(ocdr, user1);
+	ocdr << user1;
 
 	ACE_InputCDR icdr(ocdr);
 	User user2;
 
 	std::cout << "1. user pid: " << user2.pid() << ", name: " << user2.name() << std::endl;
 
-	User::readExternal(icdr, user2);
+	icdr >> user2;
 
 	std::cout << "2. user pid: " << user2.pid() << ", name: " << user2.name() << std::endl;
 }
@@ -63,7 +63,7 @@ void runClient()
 	ACE_OutputCDR ocdr;
 
 	User user1(11, "uranium");
-	User::writeExternal(ocdr, user1);
+	ocdr << user1;
 
 	iovec *io_vec = new iovec();
 	io_vec->iov_base = ocdr.begin()->rd_ptr();

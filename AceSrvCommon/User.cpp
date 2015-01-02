@@ -1,7 +1,10 @@
 #include "User.h"
 
+#include <ace/ACE_export.h>
 
-int User::writeExternal(ACE_OutputCDR& cdr, User& user) 
+// iostream operators for User.
+
+int operator<< (ACE_OutputCDR &cdr, const User &user)
 {
 	cdr << ACE_CDR::Long(user.pid());
 	
@@ -11,7 +14,7 @@ int User::writeExternal(ACE_OutputCDR& cdr, User& user)
 	return cdr.good_bit();
 }
 
-int User::readExternal(ACE_InputCDR& cdr, User& user)
+int operator>> (ACE_InputCDR &cdr, User &user)
 {
 	ACE_CDR::Long pid;
 	cdr >> pid;
