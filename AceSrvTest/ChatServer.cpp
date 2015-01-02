@@ -6,6 +6,7 @@
 #include "ChatServer.h"
 #include "User.h"
 #include "Status.h"
+#include "Util.h"
 
 ChatServer::ChatServer()
 {
@@ -69,7 +70,7 @@ int ChatServer::handle_data()
 	iovec *io_vec = new iovec();
 	int n = peer.recvv(io_vec);
 
-	dumpMessage(io_vec, true);
+	Util::dumpMessage(io_vec, true);
 
 	ACE_InputCDR icdr(io_vec->iov_base, io_vec->iov_len);
 
@@ -102,13 +103,13 @@ void ChatServer::sendResponse(long code)
 	ACE_OutputCDR ocdr;
 
 	Status status(code);
-	Status::writeExternal(ocdr, status);
+	ocdr << status;
 
 	iovec *io_vec = new iovec();
 	io_vec->iov_base = ocdr.begin()->rd_ptr();
 	io_vec->iov_len = ocdr.length();
 
-	dumpMessage(io_vec, false);
+	Util::dumpMessage(io_vec, false);
 
 	if (peer.sendv(io_vec, 1) == -1)
 	{
@@ -116,19 +117,4 @@ void ChatServer::sendResponse(long code)
 	}
 
 	delete io_vec;
-}
-
-void ChatServer::dumpMessage(iovec * io_vec, bool incoming)
-{
-	if (incoming)
-	{
-		std::cout << "[RECEIVE] ";
-	}
-	else
-	{
-		std::cout << "[SEND] ";
-	}
-	std::cout << "io_vec->iov_len: " << io_vec->iov_len << ", io_vec->iov_base:[";
-	ACE::write_n(ACE_STDOUT, io_vec->iov_base, io_vec->iov_len);
-	std::cout << "]" << std::endl;
 }

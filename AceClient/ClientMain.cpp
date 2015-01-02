@@ -8,37 +8,24 @@
 #include "User.h"
 #include "Status.h"
 #include "config.h"
+#include "Util.h"
+#include "Header.h"
 
 void test()
 {
-	User user1(11, "uranium");
+	Header header1(Header::MESSAGE);
 	ACE_OutputCDR ocdr;
 
-	ocdr << user1;
+	ocdr << header1;
 
 	ACE_InputCDR icdr(ocdr);
-	User user2;
+	Header header2;
 
-	std::cout << "1. user pid: " << user2.pid() << ", name: " << user2.name() << std::endl;
+	std::cout << "1. Header command: " << header2.command() << std::endl;
 
-	icdr >> user2;
+	icdr >> header2;
 
-	std::cout << "2. user pid: " << user2.pid() << ", name: " << user2.name() << std::endl;
-}
-
-void dumpMessage(iovec * io_vec, bool incoming)
-{
-	if (incoming)
-	{
-		std::cout << "[RECEIVE] ";
-	}
-	else
-	{
-		std::cout << "[SEND] ";
-	}
-	std::cout << "io_vec->iov_len: " << io_vec->iov_len << ", io_vec->iov_base:[";
-	ACE::write_n(ACE_STDOUT, io_vec->iov_base, io_vec->iov_len);
-	std::cout << "]" << std::endl;
+	std::cout << "2. Header command: " << header2.command() << std::endl;
 }
 
 void runClient()
@@ -62,14 +49,14 @@ void runClient()
 
 	ACE_OutputCDR ocdr;
 
-	User user1(11, "uranium");
-	ocdr << user1;
+	User user(11, "uranium");
+	ocdr << user;
 
 	iovec *io_vec = new iovec();
 	io_vec->iov_base = ocdr.begin()->rd_ptr();
 	io_vec->iov_len = ocdr.length();
 
-	dumpMessage(io_vec, false);
+	Util::dumpMessage(io_vec, false);
 
 	if (peer.sendv(io_vec, 1) == -1)
 	{
@@ -86,12 +73,12 @@ void runClient()
 	io_vec = new iovec();
 	int n = peer.recvv(io_vec);
 
-	dumpMessage(io_vec, true);
+	Util::dumpMessage(io_vec, true);
 
 	ACE_InputCDR icdr(io_vec->iov_base, io_vec->iov_len);
 
 	Status status;
-	Status::readExternal(icdr, status);
+	icdr >> status;
 
 	std::cout << "[RECEIVED] status=[status: " << status.code() << "]" << std::endl;
 

@@ -23,7 +23,6 @@ protected:
 private:
 	int open();
 
-	void dumpMessage(iovec * io_vec, bool incoming);
 	void extractMessageBlock(ACE_InputCDR& icdr);
 	void sendResponse(long code);
 
