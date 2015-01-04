@@ -7,11 +7,13 @@ class Header
 public:
 
 	enum Command {
-		LOGIN = 0,
-		MESSAGE = 1
+		STATUS = 1,
+		LOGIN = 2,
+		MESSAGE = 3
 	};
 
 	Header() : m_lCommand(-1) {}
+	Header(Header& header) : m_lCommand(header.command()) {}
 	Header(long command) : m_lCommand(command) {}
 	virtual ~Header() {}
 

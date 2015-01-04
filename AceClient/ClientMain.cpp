@@ -5,7 +5,7 @@
 #include <conio.h>
 #include <iostream>
 
-#include "User.h"
+#include "Login.h"
 #include "Status.h"
 #include "config.h"
 #include "Util.h"
@@ -47,33 +47,19 @@ void runClient()
 		return;
 	}
 
-	ACE_OutputCDR ocdr;
+	Login login(11, "uranium");
 
-	User user(11, "uranium");
-	ocdr << user;
-
-	iovec *io_vec = new iovec();
-	io_vec->iov_base = ocdr.begin()->rd_ptr();
-	io_vec->iov_len = ocdr.length();
-
-	Util::dumpMessage(io_vec, false);
-
-	if (peer.sendv(io_vec, 1) == -1)
-	{
-		std::cerr << "Error sending data." << std::endl;
-	}
+	Util::sendLogin(peer, login);
 
 	/*	for (ssize_t n; (n = peer.recv(buf, sizeof buf)) > 0; )
 	{
 	ACE::write_n(ACE_STDOUT, buf, n);
 	}*/
 
-	delete io_vec;
-
-	io_vec = new iovec();
+	iovec* io_vec = new iovec();
 	int n = peer.recvv(io_vec);
 
-	Util::dumpMessage(io_vec, true);
+	Util::dumpMessage(io_vec, 1, true);
 
 	ACE_InputCDR icdr(io_vec->iov_base, io_vec->iov_len);
 

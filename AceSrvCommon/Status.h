@@ -1,6 +1,8 @@
 #pragma once
 
-#include "ace/CDR_Stream.h"
+#include <ace/CDR_Stream.h>
+
+#include <string>
 
 class Status
 {

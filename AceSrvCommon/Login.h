@@ -1,15 +1,15 @@
 #pragma once
 
-#include "ace/CDR_Stream.h"
+#include <ace/CDR_Stream.h>
 
 #include <string>
 
-class User
+class Login
 {
 public:
-	User() : m_lPid(-1) {}
-	User(long _lPid, std::string _name) : m_lPid(_lPid), m_Name(_name) {}
-	virtual ~User() {}
+	Login() : m_lPid(-1) {}
+	Login(long _lPid, std::string _name) : m_lPid(_lPid), m_Name(_name) {}
+	virtual ~Login() {}
 
 	const std::string& name(void) const { return m_Name; }
 	const long pid(void) const { return m_lPid; }
@@ -23,7 +23,7 @@ private:
 	std::string m_Name;
 };
 
-// iostream operators for User.
-int operator>> (ACE_InputCDR &cdr, User &user);
-int operator<< (ACE_OutputCDR &cdr, const User &user);
+// iostream operators for Login.
+int operator>> (ACE_InputCDR &cdr, Login &Login);
+int operator<< (ACE_OutputCDR &cdr, const Login &Login);
 
