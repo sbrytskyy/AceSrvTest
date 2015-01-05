@@ -7,5 +7,5 @@ int ACE_TMAIN(int, ACE_TCHAR *[])
 	ChatServer chatServer;
 	chatServer.run();
 
-	return 0;
+	return EXIT_SUCCESS;
 }

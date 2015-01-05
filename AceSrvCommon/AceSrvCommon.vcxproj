@@ -73,6 +73,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Header.cpp" />
+    <ClCompile Include="PacketHandler.cpp" />
     <ClCompile Include="Status.cpp" />
     <ClCompile Include="Login.cpp" />
     <ClCompile Include="Util.cpp" />
@@ -80,6 +81,8 @@
   <ItemGroup>
     <ClInclude Include="config.h" />
     <ClInclude Include="Header.h" />
+    <ClInclude Include="PacketHandler.h" />
+    <ClInclude Include="PacketListener.h" />
     <ClInclude Include="Status.h" />
     <ClInclude Include="Login.h" />
     <ClInclude Include="Util.h" />

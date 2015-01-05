@@ -6,7 +6,8 @@ class Header
 {
 public:
 
-	enum Command {
+	enum Command 
+	{
 		STATUS = 1,
 		LOGIN = 2,
 		MESSAGE = 3

@@ -6,14 +6,18 @@
 #include <ace/SOCK_Stream.h>
 #include <ace/CDR_Stream.h>
 
+#include "PacketListener.h"
 #include "config.h"
 
-class ChatServer
+class ChatServer : public PacketListener
 {
 public:
-	ChatServer();
+	ChatServer() {}
 	virtual ~ChatServer();
 	int run();
+
+	virtual void onStatus(Status& status);
+	virtual void onLogin(Login& login);
 
 protected:
 	virtual int wait_for_multiple_events() { return 0; }

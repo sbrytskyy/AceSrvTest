@@ -7,6 +7,12 @@
 class Status
 {
 public:
+	enum Code
+	{
+		OK = 0,
+		MISTAKE = 1
+	};
+
 	Status() : m_lCode(-1) {}
 	Status(long code) : m_lCode(code) {}
 	virtual ~Status() {}

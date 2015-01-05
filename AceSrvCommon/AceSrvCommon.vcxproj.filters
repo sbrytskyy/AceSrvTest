@@ -27,6 +27,9 @@
     <ClCompile Include="Login.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="PacketHandler.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="config.h">
@@ -42,6 +45,12 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Login.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="PacketHandler.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="PacketListener.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

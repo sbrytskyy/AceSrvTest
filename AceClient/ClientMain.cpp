@@ -10,6 +10,22 @@
 #include "config.h"
 #include "Util.h"
 #include "Header.h"
+#include "PacketHandler.h"
+#include "PacketListener.h"
+
+class Client : public PacketListener
+{
+public:
+	void Client::onStatus(Status& status)
+	{
+		std::cout << "[Client::onStatus] status=[code: " << status.code() << "]" << std::endl;
+	}
+
+	void Client::onLogin(Login& login)
+	{
+		std::cout << "[Client::onLogin] login=[pid: " << login.pid() << ", name: " << login.name() << "]" << std::endl;
+	}
+};
 
 void test()
 {
@@ -49,27 +65,10 @@ void runClient()
 
 	Login login(11, "uranium");
 
-	Util::sendLogin(peer, login);
+	PacketHandler::sendLogin(peer, login);
 
-	/*	for (ssize_t n; (n = peer.recv(buf, sizeof buf)) > 0; )
-	{
-	ACE::write_n(ACE_STDOUT, buf, n);
-	}*/
-
-	iovec* io_vec = new iovec();
-	int n = peer.recvv(io_vec);
-
-	Util::dumpMessage(io_vec, 1, true);
-
-	ACE_InputCDR icdr(io_vec->iov_base, io_vec->iov_len);
-
-	Status status;
-	icdr >> status;
-
-	std::cout << "[RECEIVED] status=[status: " << status.code() << "]" << std::endl;
-
-	delete[] io_vec->iov_base;
-	delete io_vec;
+	Client client;
+	PacketHandler::processPacket(peer, client);
 
 	peer.close();
 }

@@ -4,15 +4,11 @@
 #include <string>
 
 #include "ChatServer.h"
+#include "PacketHandler.h"
 #include "Header.h"
 #include "Login.h"
 #include "Status.h"
 #include "Util.h"
-
-ChatServer::ChatServer()
-{
-}
-
 
 ChatServer::~ChatServer()
 {
@@ -68,64 +64,23 @@ int ChatServer::handle_connections()
 
 int ChatServer::handle_data()
 {
-	iovec *io_vec = new iovec();
 
-	int n = peer.recvv(io_vec);
+	long code = 0;
+	Status status(code);
 
-	ACE_DEBUG((LM_DEBUG, "%m\n"));
-	Util::dumpMessage(io_vec, 1, true);
+	PacketHandler::processPacket(peer, *this);
 
-	ACE_InputCDR icdr(io_vec->iov_base, n);
-
-	Header header;
-	icdr >> header;
-
-	switch (header.command())
-	{
-	case Header::Command::LOGIN:
-		Login login;
-		icdr >> login;
-
-		std::cout << "[RECEIVED] login=[pid: " << login.pid() << ", name: " << login.name() << "]" << std::endl;
-	}
-
-	
-	delete[] io_vec->iov_base;
-	delete io_vec;
-
-	sendResponse(0);
+	PacketHandler::sendStatus(peer, status);
 
 	return 0;
 }
 
-void ChatServer::extractMessageBlock(ACE_InputCDR& icdr)
+void ChatServer::onStatus(Status& status)
 {
-	//ACE_Message_Block *messageBlock = new ACE_Message_Block(ACE_DEFAULT_CDR_BUFSIZE);
-
-	const ACE_Message_Block * mblk = icdr.start();
-
-	//ACE::write_n(ACE_STDOUT, mblk->rd_ptr(), mblk->length());
-	std::string message(mblk->rd_ptr(), mblk->length());
-	std::cout << "mblk->length(): " << mblk->length() << ", message: " << message << std::endl;
+	std::cout << "[ChatServer::onStatus] status=[code: " << status.code() << "]" << std::endl;
 }
 
-void ChatServer::sendResponse(long code)
+void ChatServer::onLogin(Login& login)
 {
-	ACE_OutputCDR ocdr;
-
-	Status status(code);
-	ocdr << status;
-
-	iovec *io_vec = new iovec();
-	io_vec->iov_base = ocdr.begin()->rd_ptr();
-	io_vec->iov_len = ocdr.length();
-
-	Util::dumpMessage(io_vec, 1, false);
-
-	if (peer.sendv(io_vec, 1) == -1)
-	{
-		std::cerr << "Error sending data." << std::endl;
-	}
-
-	delete io_vec;
+	std::cout << "[ChatServer::onLogin] login=[pid: " << login.pid() << ", name: " << login.name() << "]" << std::endl;
 }
