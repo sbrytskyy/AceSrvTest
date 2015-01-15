@@ -23,6 +23,8 @@ public:
 
 	static void processPacket(ACE_SOCK_Stream& peer, PacketListener& listener);
 
+	ACE_SOCK_Stream& peer() { return m_peer; }
+
 private:
 	template<class T> static void sendPacket(ACE_SOCK_Stream& peer, T& packet, Header::Command command)
 	{
@@ -51,5 +53,6 @@ private:
 		delete io_vec;
 	}
 
+	ACE_SOCK_Stream m_peer;
 };
 

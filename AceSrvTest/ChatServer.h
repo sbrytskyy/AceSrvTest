@@ -3,10 +3,10 @@
 #include <ace/ACE.h>
 #include <ace/INET_Addr.h>
 #include <ace/SOCK_Acceptor.h>
-#include <ace/SOCK_Stream.h>
 #include <ace/CDR_Stream.h>
 
 #include "PacketListener.h"
+#include "PacketHandler.h"
 #include "config.h"
 
 class ChatServer : public PacketListener
@@ -18,6 +18,8 @@ public:
 
 	virtual void onStatus(Status& status);
 	virtual void onLogin(Login& login);
+
+	PacketHandler& packetHandler() { return m_packetHandler; }
 
 protected:
 	virtual int wait_for_multiple_events() { return 0; }
@@ -32,6 +34,6 @@ private:
 
 	ACE_INET_Addr server_addr;
 	ACE_SOCK_Acceptor acceptor;
-	ACE_SOCK_Stream peer;
+	PacketHandler m_packetHandler;
 };
 

@@ -32,12 +32,14 @@ void PacketHandler::processPacket(ACE_SOCK_Stream& peer, PacketListener& listene
 			icdr >> login;
 			listener.onLogin(login);
 		}
+		break;
 	case Header::Command::STATUS:
 		{
 			Status status;
 			icdr >> status;
 			listener.onStatus(status);
 		}
+		break;
 	}
 
 	delete[] io_vec->iov_base;

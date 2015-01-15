@@ -51,13 +51,13 @@ int ChatServer::open()
 
 int ChatServer::handle_connections()
 {
-	int result = acceptor.accept(peer);
+	int result = acceptor.accept(packetHandler().peer());
 	if (result == EXIT_FAILURE)
 	{
 		ACE_ERROR_RETURN((LM_ERROR, "%p\n", "acceptor.accept()"), EXIT_FAILURE);
 	}
 
-	peer.disable(ACE_NONBLOCK);
+	packetHandler().peer().disable(ACE_NONBLOCK);
 
 	return result;
 }
@@ -68,9 +68,9 @@ int ChatServer::handle_data()
 	long code = 0;
 	Status status(code);
 
-	PacketHandler::processPacket(peer, *this);
+	PacketHandler::processPacket(packetHandler().peer(), *this);
 
-	PacketHandler::sendStatus(peer, status);
+	PacketHandler::sendStatus(packetHandler().peer(), status);
 
 	return 0;
 }
