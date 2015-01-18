@@ -18,15 +18,16 @@ public:
 	PacketHandler() {}
 	virtual ~PacketHandler() {}
 
-	static void sendLogin(ACE_SOCK_Stream& peer, Login& login);
-	static void sendStatus(ACE_SOCK_Stream& peer, Status& status);
+	void sendLogin(Login& login);
+	void sendStatus(Status& status);
 
-	static void processPacket(ACE_SOCK_Stream& peer, PacketListener& listener);
+	int processPacket(PacketListener& listener);
 
 	ACE_SOCK_Stream& peer() { return m_peer; }
+	int close();
 
 private:
-	template<class T> static void sendPacket(ACE_SOCK_Stream& peer, T& packet, Header::Command command)
+	template<class T> void sendPacket(T& packet, Header::Command command)
 	{
 		ACE_OutputCDR ocdrHeader;
 		Header header(command);
@@ -45,14 +46,15 @@ private:
 
 		Util::dumpMessage(io_vec, 2, false);
 
-		if (peer.sendv(io_vec, 2) == -1)
+		if (peer().sendv(io_vec, 2) == -1)
 		{
-			std::cerr << "Error sending Status." << std::endl;
+			std::cerr << "Error sending " << command << std::endl;
 		}
+		ACE_DEBUG((LM_DEBUG, "%m\n"));
 
 		delete io_vec;
 	}
-
+	
 	ACE_SOCK_Stream m_peer;
 };
 

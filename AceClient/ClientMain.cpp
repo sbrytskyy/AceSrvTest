@@ -4,6 +4,7 @@
 
 #include <conio.h>
 #include <iostream>
+#include <ctime>
 
 #include "Login.h"
 #include "Status.h"
@@ -44,12 +45,15 @@ void test()
 	std::cout << "2. Header command: " << header2.command() << std::endl;
 }
 
+void testSend(PacketHandler &packetHandler);
+
 void runClient()
 {
 	const char* server_hostname = "localhost";
 
+	PacketHandler packetHandler;
+
 	ACE_SOCK_Connector connector;
-	ACE_SOCK_Stream peer;
 	ACE_INET_Addr peer_addr;
 
 	if (peer_addr.set(SERVER_PORT, server_hostname) == -1)
@@ -57,20 +61,16 @@ void runClient()
 		std::cerr << "Error initializing an ACE_INET_Addr from a port_number and the remote host_name.." << std::endl;
 		return;
 	}
-	else if (connector.connect(peer, peer_addr) == -1)
+	else if (connector.connect(packetHandler.peer(), peer_addr) == -1)
 	{
 		std::cerr << "Error connecting to a peer, producing a connected ACE_SOCK_Stream object if the connection succeeds." << std::endl;
 		return;
 	}
 
-	Login login(11, "uranium");
+	for (int i=0; i<10; i++)
+		testSend(packetHandler);
 
-	PacketHandler::sendLogin(peer, login);
-
-	Client client;
-	PacketHandler::processPacket(peer, client);
-
-	peer.close();
+	packetHandler.close();
 }
 
 int ACE_TMAIN(int, ACE_TCHAR *[])
@@ -82,4 +82,23 @@ int ACE_TMAIN(int, ACE_TCHAR *[])
 	_getch();
 
 	return 0;
+}
+
+static int counter = 0;
+
+void testSend(PacketHandler &packetHandler)
+{
+	/*time_t rawtime;
+	struct tm * timeinfo;
+
+	//time ( &rawtime );
+	timeinfo = localtime(&rawtime);*/
+	//std::cout << "Current local time and date: " << time(NULL) << std::endl;
+
+	Login login((long)time(NULL), "uranium");
+
+	packetHandler.sendLogin(login);
+
+	Client client;
+	packetHandler.processPacket(client);
 }

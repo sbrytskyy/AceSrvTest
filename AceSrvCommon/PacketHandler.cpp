@@ -1,22 +1,22 @@
 #include "PacketHandler.h"
 
-void PacketHandler::sendLogin(ACE_SOCK_Stream& peer, Login& login)
+void PacketHandler::sendLogin(Login& login)
 {
-	sendPacket(peer, login, Header::Command::LOGIN);
+	sendPacket(login, Header::Command::LOGIN);
 }
 
-void PacketHandler::sendStatus(ACE_SOCK_Stream& peer, Status& status)
+void PacketHandler::sendStatus(Status& status)
 {
-	sendPacket(peer, status, Header::Command::STATUS);
+	sendPacket(status, Header::Command::STATUS);
 }
 
-void PacketHandler::processPacket(ACE_SOCK_Stream& peer, PacketListener& listener)
+int PacketHandler::processPacket(PacketListener& listener)
 {
 	iovec *io_vec = new iovec();
 
-	int n = peer.recvv(io_vec);
+	int n = peer().recvv(io_vec);
 
-	ACE_DEBUG((LM_DEBUG, "%m\n"));
+	//ACE_DEBUG((LM_DEBUG, "%m\n"));
 	Util::dumpMessage(io_vec, 1, true);
 
 	ACE_InputCDR icdr(io_vec->iov_base, n);
@@ -44,4 +44,11 @@ void PacketHandler::processPacket(ACE_SOCK_Stream& peer, PacketListener& listene
 
 	delete[] io_vec->iov_base;
 	delete io_vec;
+
+	return n;
+}
+
+int PacketHandler::close()
+{
+	return m_peer.close();
 }

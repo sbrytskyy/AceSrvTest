@@ -4,6 +4,7 @@
 #include <ace/INET_Addr.h>
 #include <ace/SOCK_Acceptor.h>
 #include <ace/CDR_Stream.h>
+#include "ace/Handle_Set.h"
 
 #include "PacketListener.h"
 #include "PacketHandler.h"
@@ -22,9 +23,20 @@ public:
 	PacketHandler& packetHandler() { return m_packetHandler; }
 
 protected:
-	virtual int wait_for_multiple_events() { return 0; }
+
+	// Keep track of the acceptor socket handle and all the
+	// connected stream socket handles.
+	ACE_Handle_Set master_handle_set_;
+
+	// Keep track of handles marked as active by <select>.
+	ACE_Handle_Set active_handles_;
+
+	virtual int wait_for_multiple_events();
 	virtual int handle_connections();
 	virtual int handle_data();
+
+	// Accessor.
+	ACE_SOCK_Acceptor& acceptor() { return m_acceptor; }
 
 private:
 	int open();
@@ -33,7 +45,7 @@ private:
 	void sendResponse(long code);
 
 	ACE_INET_Addr server_addr;
-	ACE_SOCK_Acceptor acceptor;
+	ACE_SOCK_Acceptor m_acceptor;
 	PacketHandler m_packetHandler;
 };
 
