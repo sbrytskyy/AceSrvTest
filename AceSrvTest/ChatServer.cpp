@@ -53,7 +53,8 @@ int ChatServer::open()
 	}
 	master_handle_set_.set_bit(acceptor().get_handle());
 	int m_num_set = master_handle_set_.num_set();
-	ACE_DEBUG((LM_DEBUG, "master_handle_set_.num_set()=%d\n", m_num_set));
+	//ACE_DEBUG((LM_DEBUG, "master_handle_set_.num_set()=%d\n", m_num_set));
+	Util::log("master_handle_set_.num_set()=%d\n", m_num_set);
 	acceptor().enable(ACE_NONBLOCK);
 
 	return result;
@@ -96,12 +97,15 @@ int ChatServer::handle_data()
 
 void ChatServer::onStatus(Status& status)
 {
-	std::cout << "[ChatServer::onStatus] status=[code: " << status.code() << "]" << std::endl;
+	//std::cout << "[ChatServer::onStatus] status=[code: " << status.code() << "]" << std::endl;
+	Util::log("[ChatServer::onStatus] status=[code: %d]\n", status.code());
+
 }
 
 void ChatServer::onLogin(Login& login)
 {
-	std::cout << "[ChatServer::onLogin] login=[pid: " << login.pid() << ", name: " << login.name() << "]" << std::endl;
+	//std::cout << "[ChatServer::onLogin] login=[pid: " << login.pid() << ", name: " << login.name() << "]" << std::endl;
+	Util::log("[ChatServer::onLogin] login = [pid: %d, name : %s]\n", login.pid(), login.name());
 	
 	long code = 0;
 	Status status(code);

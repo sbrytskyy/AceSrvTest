@@ -4,6 +4,8 @@
 
 int ACE_TMAIN(int, ACE_TCHAR *[])
 {
+	Util::log("%s\n", "[Server] START");
+
 	ChatServer chatServer;
 	chatServer.run();
 

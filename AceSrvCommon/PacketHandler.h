@@ -1,7 +1,7 @@
 #pragma once
 
 #include <ace/SOCK_Stream.h>
-#include <ace/Log_Msg.h>
+//#include <ace/Log_Msg.h>
 
 #include <iostream>
 
@@ -50,7 +50,7 @@ private:
 		{
 			std::cerr << "Error sending " << command << std::endl;
 		}
-		ACE_DEBUG((LM_DEBUG, "%m\n"));
+		//ACE_DEBUG((LM_DEBUG, "%m\n"));
 
 		delete io_vec;
 	}

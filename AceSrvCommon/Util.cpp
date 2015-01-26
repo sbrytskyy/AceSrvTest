@@ -4,13 +4,17 @@
 
 void Util::dumpMessage(const iovec * io_vec, const size_t size, bool incoming)
 {
+
 	if (incoming)
 	{
-		std::cout << "[RECEIVE]";
+		//std::cout << "[RECEIVE]";
+		Util::log("%s", "[RECEIVE]");
 	}
 	else
 	{
-		std::cout << "[SEND]";
+		//std::cout << "[SEND]";
+		std::cout << std::endl << std::endl;
+		Util::log("%s", "[SEND]");
 	}
 	if (size == -1)
 	{
@@ -39,6 +43,7 @@ void Util::dumpMessage(const iovec * io_vec, const size_t size, bool incoming)
 		io_vec++;
 		counter++;
 	}
+	std::cout << std::endl;
 }
 
 
@@ -55,8 +60,9 @@ void Util::log(const char *pszFormat, ...)
 
 	ACE_Time_Value detail_time = ACE_OS::gettimeofday();
 
-	printf("[%d] %d.%d.%d, %d:%d:%d.%lu ",
-		timeinfo.tm_wday, /* Mon - Sun */
+	//printf("[%d] %d.%d.%d, %d:%d:%d.%lu ",
+	printf("%d.%d.%d, %d:%d:%d.%lu ",
+		//timeinfo.tm_wday, /* Mon - Sun */
 		timeinfo.tm_mday,
 		timeinfo.tm_mon + 1,
 		timeinfo.tm_year + 1900,

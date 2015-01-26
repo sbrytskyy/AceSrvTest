@@ -19,12 +19,12 @@ class Client : public PacketListener
 public:
 	void Client::onStatus(Status& status)
 	{
-		std::cout << "[Client::onStatus] status=[code: " << status.code() << "]" << std::endl;
+		Util::log("[Client::onStatus] status=[code: %d]\n", status.code());
 	}
 
 	void Client::onLogin(Login& login)
 	{
-		std::cout << "[Client::onLogin] login=[pid: " << login.pid() << ", name: " << login.name() << "]" << std::endl;
+		Util::log("[Client::onLogin] login = [pid: %d, name : %s]\n", login.pid(), login.name());
 	}
 };
 
@@ -75,6 +75,8 @@ void runClient()
 
 int ACE_TMAIN(int, ACE_TCHAR *[])
 {
+	Util::log("%s\n", "[Client] START");
+
 	//test();
 
 	runClient();
@@ -96,8 +98,6 @@ void testSend(PacketHandler &packetHandler)
 	//std::cout << "Current local time and date: " << time(NULL) << std::endl;
 
 	Login login((long)time(NULL), "uranium");
-
-	Util::log("%s\n", "SB test");
 
 	packetHandler.sendLogin(login);
 
