@@ -52,6 +52,8 @@ int ChatServer::open()
 		ACE_ERROR_RETURN((LM_ERROR, "%p\n", "acceptor.open()"), EXIT_FAILURE);
 	}
 	master_handle_set_.set_bit(acceptor().get_handle());
+	int m_num_set = master_handle_set_.num_set();
+	ACE_DEBUG((LM_DEBUG, "master_handle_set_.num_set()=%d\n", m_num_set));
 	acceptor().enable(ACE_NONBLOCK);
 
 	return result;
@@ -81,7 +83,7 @@ int ChatServer::handle_data()
 
 		while (packetHandler().processPacket(*this));
 		
-		//std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+		std::this_thread::sleep_for(std::chrono::milliseconds(1000));
 
 		//if (!result) {
 			// Handle connection shutdown or comm failure.

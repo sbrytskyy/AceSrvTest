@@ -97,8 +97,11 @@ void testSend(PacketHandler &packetHandler)
 
 	Login login((long)time(NULL), "uranium");
 
+	Util::log("%s\n", "SB test");
+
 	packetHandler.sendLogin(login);
 
 	Client client;
 	packetHandler.processPacket(client);
+	//packetHandler.close();
 }

@@ -1,5 +1,7 @@
 #include "Util.h"
 
+#include <ace/OS_NS_sys_time.h>
+
 void Util::dumpMessage(const iovec * io_vec, const size_t size, bool incoming)
 {
 	if (incoming)
@@ -39,3 +41,36 @@ void Util::dumpMessage(const iovec * io_vec, const size_t size, bool incoming)
 	}
 }
 
+
+void Util::log(const char *pszFormat, ...)
+{
+	va_list ap;
+
+	//long ms = (long)time(NULL);
+
+	time_t rawtime;
+	rawtime = time(NULL);
+	struct tm timeinfo;
+	localtime_s(&timeinfo, &rawtime);
+
+	ACE_Time_Value detail_time = ACE_OS::gettimeofday();
+
+	printf("[%d] %d.%d.%d, %d:%d:%d.%lu ",
+		timeinfo.tm_wday, /* Mon - Sun */
+		timeinfo.tm_mday,
+		timeinfo.tm_mon + 1,
+		timeinfo.tm_year + 1900,
+		timeinfo.tm_hour,
+		timeinfo.tm_min,
+		timeinfo.tm_sec,
+		detail_time.usec() / 1000);
+
+	va_start(ap, pszFormat);
+
+	vprintf(pszFormat, ap);
+	//ACE_DEBUG((LM_DEBUG, pszFormat, ap));
+
+	va_end(ap);
+
+	
+}
