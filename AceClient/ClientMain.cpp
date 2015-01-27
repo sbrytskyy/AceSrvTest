@@ -5,6 +5,9 @@
 #include <conio.h>
 #include <iostream>
 #include <ctime>
+#include <stdlib.h>
+#include <chrono>
+#include <thread>
 
 #include "Login.h"
 #include "Status.h"
@@ -66,42 +69,56 @@ void runClient()
 		std::cerr << "Error connecting to a peer, producing a connected ACE_SOCK_Stream object if the connection succeeds." << std::endl;
 		return;
 	}
+	Util::log("[Client] Connected... Handle=%d\n", packetHandler.peer().get_handle());
 
-	for (int i=0; i<10; i++)
+	std::this_thread::sleep_for(std::chrono::milliseconds(5000));
+
+	/* generate number between 1 and 10: */
+	int counter = rand() % 10 + 1;
+
+	for (int i = 0; i < 1; i++)
 		testSend(packetHandler);
 
 	packetHandler.close();
+}
+
+static int pidCounter = 0;
+
+void testSend(PacketHandler &packetHandler)
+{
+	//Login login((long)time(NULL), "uranium");
+	Login login(pidCounter++, "uranium");
+
+	Util::log("[Client] Sending login with pid %d\n", login.pid());
+	packetHandler.sendLogin(login);
+
+	Client client;
+	packetHandler.processPacket(client);
+	//packetHandler.close();
 }
 
 int ACE_TMAIN(int, ACE_TCHAR *[])
 {
 	Util::log("%s\n", "[Client] START");
 
+	/* initialize random seed: */
+	srand(time(NULL));
+
 	//test();
 
-	runClient();
+	for (int i = 0; i < 1; i++)
+	{
+		runClient();
+
+		/* generate number between 1 and 10: */
+		int counter = rand() % 10 + 1;
+
+		std::this_thread::sleep_for(std::chrono::milliseconds(counter * 1000));
+	}
+
+	Util::log("%s\n", "[Client] FINISH");
 
 	_getch();
 
 	return 0;
-}
-
-static int counter = 0;
-
-void testSend(PacketHandler &packetHandler)
-{
-	/*time_t rawtime;
-	struct tm * timeinfo;
-
-	//time ( &rawtime );
-	timeinfo = localtime(&rawtime);*/
-	//std::cout << "Current local time and date: " << time(NULL) << std::endl;
-
-	Login login((long)time(NULL), "uranium");
-
-	packetHandler.sendLogin(login);
-
-	Client client;
-	packetHandler.processPacket(client);
-	//packetHandler.close();
 }
