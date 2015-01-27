@@ -44,7 +44,7 @@ private:
 		io_vec[1].iov_base = ocdr.begin()->rd_ptr();
 		io_vec[1].iov_len = ocdr.length();
 
-		Util::dumpMessage(io_vec, 2, false);
+		//Util::dumpMessage(io_vec, 2, false);
 
 		if (peer().sendv(io_vec, 2) == -1)
 		{

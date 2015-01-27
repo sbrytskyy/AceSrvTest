@@ -17,7 +17,7 @@ int PacketHandler::processPacket(PacketListener& listener)
 	int n = peer().recvv(io_vec);
 
 	//ACE_DEBUG((LM_DEBUG, "%m\n"));
-	Util::dumpMessage(io_vec, 1, true);
+	//Util::dumpMessage(io_vec, 1, true);
 
 	ACE_InputCDR icdr(io_vec->iov_base, n);
 

@@ -61,7 +61,7 @@ void Util::log(const char *pszFormat, ...)
 	ACE_Time_Value detail_time = ACE_OS::gettimeofday();
 
 	//printf("[%d] %d.%d.%d, %d:%d:%d.%lu ",
-	printf("%d.%d.%d, %d:%d:%d.%lu ",
+	printf("[%d.%d.%d, %d:%d:%d.%lu] ",
 		//timeinfo.tm_wday, /* Mon - Sun */
 		timeinfo.tm_mday,
 		timeinfo.tm_mon + 1,
