@@ -106,19 +106,24 @@ int ACE_TMAIN(int, ACE_TCHAR *[])
 
 	//test();
 
-	for (int i = 0; i < 1; i++)
+	for (;;)
 	{
-		runClient();
+		for (int i = 0; i < 1; i++)
+		{
+			Util::log("%s\n", "[Client] press any key to start send session");
+			_getch();
+			runClient();
 
-		/* generate number between 1 and 10: */
-		int counter = rand() % 10 + 1;
+			/* generate number between 1 and 10: */
+			//int counter = rand() % 10 + 1;
 
-		std::this_thread::sleep_for(std::chrono::milliseconds(counter * 1000));
+			//std::this_thread::sleep_for(std::chrono::milliseconds(counter * 1000));
+		}
+
+		Util::log("%s\n\n", "[Client] send session finished");
 	}
 
 	Util::log("%s\n", "[Client] FINISH");
-
-	_getch();
 
 	return 0;
 }
