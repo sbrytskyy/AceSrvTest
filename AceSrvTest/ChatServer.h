@@ -32,6 +32,7 @@ protected:
 	ACE_Handle_Set active_handles_;
 
 	virtual int wait_for_multiple_events();
+
 	virtual int handle_connections();
 	virtual int handle_data();
 
@@ -43,6 +44,8 @@ private:
 
 	void extractMessageBlock(ACE_InputCDR& icdr);
 	void sendResponse(long code);
+
+	void printHandlesSet(ACE_Handle_Set& handles, bool master, char* procedure_name);
 
 	ACE_INET_Addr server_addr;
 	ACE_SOCK_Acceptor m_acceptor;
