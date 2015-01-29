@@ -78,6 +78,52 @@ int ChatServer::open()
 	return result;
 }
 
+int ChatServer::wait_for_multiple_events()
+{
+	if (DLOG)
+	{
+		printf("\n");
+		Util::log("[ChatServer::wait_for_multiple_events] START\n");
+	}
+
+	active_handles_ = master_handle_set_;
+	int width = ACE_Utils::truncate_cast<int> ((intptr_t)active_handles_.max_set()) + 1;
+	if (DLOG)
+	{
+		Util::log("[ChatServer::wait_for_multiple_events] width=%d\n", width);
+
+		u_int fd_count = active_handles_.fdset()->fd_count;
+		SOCKET* sa = active_handles_.fdset()->fd_array;
+		for (u_int i = 0; i < fd_count; i++)
+		{
+			SOCKET s = sa[i];
+			Util::log("[ChatServer::wait_for_multiple_events] SOCKET=%d\n", s);
+		}
+
+		Util::log("[ChatServer::wait_for_multiple_events] active_handles_ fd_count=%d\n", fd_count);
+	}
+
+	int selected = select(width,
+		active_handles_.fdset(),
+		0,        // no write_fds
+		0,        // no except_fds
+		0);
+
+	if (DLOG)
+	{
+		printf("\n\n");
+		Util::log("[ChatServer::wait_for_multiple_events] SOCKET activity detected!!! Fired select()=%d\n", selected);
+	}
+
+	if (selected == -1) // no timeout
+		return -1;
+	active_handles_.sync
+		((ACE_HANDLE)((intptr_t)active_handles_.max_set() + 1));
+
+	if (DLOG) Util::log("[ChatServer::wait_for_multiple_events] END\n");
+	return 0;
+}
+
 int ChatServer::handle_connections()
 {
 	if (DLOG)
@@ -140,6 +186,10 @@ int ChatServer::handle_data()
 	{
 		printf("\n");
 		Util::log("[ChatServer::handle_data] START\n");
+
+		int m_num_set = active_handles_.num_set();
+		ACE_HANDLE max_set = active_handles_.max_set();
+		Util::log("[ChatServer::handle_data] active_handles_.num_set()=%d, max_set()=%d\n", m_num_set, max_set);
 	}
 	
 	ACE_Handle_Set_Iterator peer_iterator(active_handles_);
@@ -193,50 +243,4 @@ void ChatServer::onLogin(Login& login)
 	long code = 0;
 	Status status(code);
 	packetHandler().sendStatus(status);
-}
-
-int ChatServer::wait_for_multiple_events()
-{
-	if (DLOG)
-	{
-		printf("\n");
-		Util::log("[ChatServer::wait_for_multiple_events] START\n");
-	}
-
-	active_handles_ = master_handle_set_;
-	int width = ACE_Utils::truncate_cast<int> ((intptr_t)active_handles_.max_set()) + 1;
-	if (DLOG)
-	{
-		Util::log("[ChatServer::wait_for_multiple_events] width=%d\n", width);
-
-		u_int fd_count = active_handles_.fdset()->fd_count;
-		SOCKET* sa = active_handles_.fdset()->fd_array;
-		for (u_int i = 0; i < fd_count; i++)
-		{
-			SOCKET s = sa[i];
-			Util::log("[ChatServer::wait_for_multiple_events] SOCKET=%d\n", s);
-		}
-
-		Util::log("[ChatServer::wait_for_multiple_events] active_handles_ fd_count=%d\n", fd_count);
-	}
-
-	int selected = select(width,
-		active_handles_.fdset(),
-		0,        // no write_fds
-		0,        // no except_fds
-		0);
-
-	if (DLOG)
-	{
-		printf("\n\n"); 
-		Util::log("[ChatServer::wait_for_multiple_events] SOCKET activity detected!!! Fired select()=%d\n", selected);
-	}
-
-	if (selected == -1) // no timeout
-		return -1;
-	active_handles_.sync
-		((ACE_HANDLE)((intptr_t)active_handles_.max_set() + 1));
-
-	if (DLOG) Util::log("[ChatServer::wait_for_multiple_events] END\n");
-	return 0;
 }
