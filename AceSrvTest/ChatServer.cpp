@@ -121,8 +121,8 @@ int ChatServer::wait_for_multiple_events()
 		printHandlesSet(active_handles_, false, "wait_for_multiple_events");
 	}
 
-	if (selected == -1) // no timeout
-		return -1;
+	if (selected == SOCKET_ERROR) // no timeout
+		return SOCKET_ERROR;
 	active_handles_.sync
 		((ACE_HANDLE)((intptr_t)active_handles_.max_set() + 1));
 
@@ -262,16 +262,16 @@ void ChatServer::printHandlesSet(ACE_Handle_Set& handles, bool master, char* pro
 	{
 		u_int fd_count = fdset->fd_count;
 		SOCKET* sa = fdset->fd_array;
+		Util::log("\tfd_count=%d\n", fd_count);
 		for (u_int i = 0; i < fd_count; i++)
 		{
 			SOCKET s = sa[i];
-			Util::log("\tSOCKET=%d\n", s);
+			Util::log("\t\tSOCKET=%d\n", s);
 		}
-		Util::log("\tfd_count=%d\n", fd_count);
 	}
 	else
 	{
-		Util::log("\tfdset is EMPTY\n");
+		Util::log("; fdset is EMPTY\n");
 	}
 }
 

@@ -76,8 +76,10 @@ void runClient()
 	/* generate number between 1 and 10: */
 	int counter = rand() % 10 + 1;
 
-	for (int i = 0; i < 1; i++)
+	for (int i = 0; i < counter; i++)
 		testSend(packetHandler);
+
+	std::this_thread::sleep_for(std::chrono::milliseconds(10000));
 
 	packetHandler.close();
 }

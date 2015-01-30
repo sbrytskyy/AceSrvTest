@@ -14,7 +14,11 @@ int PacketHandler::processPacket(PacketListener& listener)
 {
 	iovec *io_vec = new iovec();
 
+	Util::log("[PacketHandler::processPacket] BEFORE int n = peer().recvv(io_vec);\n");
+
 	int n = peer().recvv(io_vec);
+
+	Util::log("[PacketHandler::processPacket] AFTER int n = peer().recvv(io_vec); n=%d\n", n);
 
 	//ACE_DEBUG((LM_DEBUG, "%m\n"));
 	//Util::dumpMessage(io_vec, 1, true);
