@@ -104,10 +104,8 @@ int ChatServer::wait_for_multiple_events()
 		printHandlesSet(master_handle_set_, true, "wait_for_multiple_events");
 	}
 
-	int selected = select(width,
-		active_handles_.fdset(),
-		0,        // no write_fds
-		0,        // no except_fds
+	int selected = ACE::select(width,
+		active_handles_,
 		0);
 
 	if (DLOG)
@@ -216,15 +214,25 @@ int ChatServer::handle_data()
 
 		packetHandler().peer().set_handle(handle);
 
-		while (packetHandler().processPacket(*this));
+		if (true)
+		{
+			while (packetHandler().processPacket(*this));
+			master_handle_set_.clr_bit(handle);
+			packetHandler().close();
+		}
+		else
+		{
+			int result = packetHandler().processPacket(*this);
 
-		//std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+			//std::this_thread::sleep_for(std::chrono::milliseconds(1000));
 
-		//if (!result) {
-		// Handle connection shutdown or comm failure.
-		master_handle_set_.clr_bit(handle);
-		packetHandler().close();
-		//}
+			if (!result) {
+				// Handle connection shutdown or comm failure.
+				master_handle_set_.clr_bit(handle);
+				packetHandler().close();
+			}
+
+		}
 
 		if (DLOG)
 		{
@@ -271,7 +279,7 @@ void ChatServer::printHandlesSet(ACE_Handle_Set& handles, bool master, char* pro
 	}
 	else
 	{
-		Util::log("; fdset is EMPTY\n");
+		Util::log("\tfdset is EMPTY\n");
 	}
 }
 

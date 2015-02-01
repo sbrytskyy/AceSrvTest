@@ -8,6 +8,12 @@
 #include <stdlib.h>
 #include <chrono>
 #include <thread>
+#include <random>
+
+
+#include <windows.h>
+#include <process.h>         // needed for _beginthread()
+
 
 #include "Login.h"
 #include "Status.h"
@@ -16,6 +22,9 @@
 #include "Header.h"
 #include "PacketHandler.h"
 #include "PacketListener.h"
+
+const int MAX_PACKETS = 10;
+const int THREADS_COUNT = 10;
 
 class Client : public PacketListener
 {
@@ -73,8 +82,9 @@ void runClient()
 
 	std::this_thread::sleep_for(std::chrono::milliseconds(5000));
 
-	/* generate number between 1 and 10: */
-	int counter = rand() % 10 + 1;
+	srand(time(NULL));
+	/* generate number between 1 and MAX_PACKETS: */
+	int counter = rand() % MAX_PACKETS + 1;
 
 	for (int i = 0; i < counter; i++)
 		testSend(packetHandler);
@@ -99,15 +109,9 @@ void testSend(PacketHandler &packetHandler)
 	//packetHandler.close();
 }
 
-int ACE_TMAIN(int, ACE_TCHAR *[])
+
+void runInfLoop()
 {
-	Util::log("%s\n", "[Client] START");
-
-	/* initialize random seed: */
-	srand(time(NULL));
-
-	//test();
-
 	for (;;)
 	{
 		for (int i = 0; i < 1; i++)
@@ -124,6 +128,68 @@ int ACE_TMAIN(int, ACE_TCHAR *[])
 
 		Util::log("%s\n\n", "[Client] send session finished");
 	}
+}
+
+
+unsigned __stdcall run(void* params)
+{
+	/* Wait one second between loops. */
+	if (params != NULL)
+	{
+		// TODO do smth with parameters
+	}
+
+	runClient();
+	return 0;
+}
+
+void runMultyThreadingTest()
+{
+	HANDLE handles[THREADS_COUNT];
+	unsigned addresses[THREADS_COUNT];
+
+	for (int i = 0; i < THREADS_COUNT; i++)
+	{
+		std::cout << "MThTest::sort(): " << i << std::endl;
+		handles[i] = (HANDLE)_beginthreadex(NULL, 0, run, /*(void *)(&data[i])*/ nullptr, 0, &addresses[i]);
+
+		std::cout << "handle[" << i << "]:" << handles[i] << std::endl;
+
+		/* Wait one second between loops. */
+		//Sleep( 1000L );
+	}
+
+	unsigned long waitResult = WaitForMultipleObjects(THREADS_COUNT, handles, true, INFINITE);
+	if ((waitResult >= WAIT_OBJECT_0) && (waitResult <= (WAIT_OBJECT_0 + THREADS_COUNT - 1)))
+	{
+		std::cout << "All threads ended, cleaning up for application exit... waitResult: " << waitResult << std::endl;
+	}
+	else	// An error occurred
+	{
+		unsigned long status = GetLastError();
+		std::cout << std::endl << "WaitForMultipleObjects failed: " << waitResult << ", GetLastError(): " << status << std::endl;
+	}
+
+	for (int i = 0; i < THREADS_COUNT; i++)
+	{
+		CloseHandle(handles[i]);
+	}
+
+	Util::log("%s\n", "[Client] press any key to finish");
+	_getch();
+}
+
+int ACE_TMAIN(int, ACE_TCHAR *[])
+{
+	Util::log("%s\n", "[Client] START");
+
+	/* initialize random seed: */
+	srand(time(NULL));
+
+	//test();
+
+	//runInfLoop();
+	runMultyThreadingTest();
 
 	Util::log("%s\n", "[Client] FINISH");
 
