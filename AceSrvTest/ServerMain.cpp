@@ -1,5 +1,6 @@
 #include <ace/ACE.h>
 #include "ace/Signal.h"
+#include "ace/Thread_Manager.h"
 
 #include "ChatServer.h"
 
@@ -18,5 +19,7 @@ int ACE_TMAIN(int, ACE_TCHAR *[])
 	ChatServer chatServer;
 	chatServer.run();
 
-	return EXIT_SUCCESS;
+	// Cooperative thread cancellation and barrier synchronization.
+	ACE_Thread_Manager::instance()->cancel_all();
+	return ACE_Thread_Manager::instance()->wait();
 }

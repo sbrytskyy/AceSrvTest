@@ -20,8 +20,6 @@ public:
 	virtual void onStatus(Status& status);
 	virtual void onLogin(Login& login);
 
-	PacketHandler& packetHandler() { return m_packetHandler; }
-
 protected:
 
 	// Keep track of the acceptor socket handle and all the
@@ -31,10 +29,10 @@ protected:
 	// Keep track of handles marked as active by <select>.
 	ACE_Handle_Set active_handles_;
 
-	virtual int wait_for_multiple_events();
+	virtual int wait_for_multiple_events() { return 0; }
 
 	virtual int handle_connections();
-	virtual int handle_data();
+	virtual int handle_data(ACE_SOCK_Stream * = 0);
 
 	// Accessor.
 	ACE_SOCK_Acceptor& acceptor() { return m_acceptor; }
@@ -49,6 +47,16 @@ private:
 
 	ACE_INET_Addr server_addr;
 	ACE_SOCK_Acceptor m_acceptor;
-	PacketHandler m_packetHandler;
+
+	struct Thread_Args {
+		Thread_Args(ChatServer *lsp) : this_(lsp) {}
+
+		ChatServer *this_;
+		ACE_SOCK_Stream logging_peer_;
+	};
+
+	// Passed as a parameter to <ACE_Thread_Manager::spawn>.
+	static ACE_THR_FUNC_RETURN run_svc(void *arg);
+
 };
 

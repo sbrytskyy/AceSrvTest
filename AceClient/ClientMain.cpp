@@ -105,7 +105,7 @@ void testSend(PacketHandler &packetHandler)
 	packetHandler.sendLogin(login);
 
 	Client client;
-	packetHandler.processPacket(client);
+	// TODO packetHandler.processPacket(client);
 	//packetHandler.close();
 }
 

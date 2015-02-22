@@ -1,13 +1,13 @@
 #include <ace/Log_Msg.h>
 #include <ace/Truncate.h>
+#include <ace/Auto_Ptr.h>
+#include "ace/Thread_Manager.h"
 
 #include <iostream>
 #include <string>
 
-
 #include <chrono>
 #include <thread>
-
 
 #include "ChatServer.h"
 #include "PacketHandler.h"
@@ -16,11 +16,20 @@
 #include "Status.h"
 #include "Util.h"
 
-#define DLOG 1
+#define DLOG false
 
 ChatServer::~ChatServer()
 {
 	acceptor().close();
+}
+
+ACE_THR_FUNC_RETURN ChatServer::run_svc(void *arg)
+{
+	auto_ptr<Thread_Args> thread_args(static_cast<Thread_Args *> (arg));
+
+	thread_args->this_->handle_data(&thread_args->logging_peer_);
+	thread_args->logging_peer_.close();
+	return 0;    // Return value is ignored
 }
 
 
@@ -34,8 +43,6 @@ int ChatServer::run()
 		if (wait_for_multiple_events() == EXIT_FAILURE)
 			return EXIT_FAILURE;
 		if (handle_connections() == EXIT_FAILURE)
-			return EXIT_FAILURE;
-		if (handle_data() == EXIT_FAILURE)
 			return EXIT_FAILURE;
 	}
 
@@ -77,63 +84,6 @@ int ChatServer::open()
 	return result;
 }
 
-int ChatServer::wait_for_multiple_events()
-{
-	if (DLOG)
-	{
-		printf("\n");
-		Util::log("[ChatServer::wait_for_multiple_events] START\n");
-	}
-	if (DLOG)
-	{
-		Util::log("[ChatServer::wait_for_multiple_events] BEFORE active_handles_ = master_handle_set_;\n");
-		printHandlesSet(active_handles_, false, "wait_for_multiple_events");
-		printHandlesSet(master_handle_set_, true, "wait_for_multiple_events");
-	}
-
-	active_handles_ = master_handle_set_;
-	int width = ACE_Utils::truncate_cast<int> ((intptr_t)active_handles_.max_set()) + 1;
-	if (DLOG)
-	{
-		Util::log("[ChatServer::wait_for_multiple_events] width=%d\n", width);
-	}
-	if (DLOG)
-	{
-		Util::log("[ChatServer::wait_for_multiple_events] AFTER active_handles_ = master_handle_set_;\n");
-		printHandlesSet(active_handles_, false, "wait_for_multiple_events");
-		printHandlesSet(master_handle_set_, true, "wait_for_multiple_events");
-	}
-
-	int selected = ACE::select(width,
-		active_handles_,
-		0);
-
-	if (DLOG)
-	{
-		printf("\n\n");
-		Util::log("[ChatServer::wait_for_multiple_events] SOCKET activity detected!!! Fired select()=%d\n", selected);
-	}
-	if (DLOG)
-	{
-		Util::log("[ChatServer::wait_for_multiple_events] AFTER select(width, active_handles_.fdset()....); \n");
-		printHandlesSet(active_handles_, false, "wait_for_multiple_events");
-	}
-
-	if (selected == SOCKET_ERROR) // no timeout
-		return SOCKET_ERROR;
-	active_handles_.sync
-		((ACE_HANDLE)((intptr_t)active_handles_.max_set() + 1));
-
-	if (DLOG)
-	{
-		Util::log("[ChatServer::wait_for_multiple_events] AFTER active_handles_.sync(....); \n");
-		printHandlesSet(active_handles_, false, "wait_for_multiple_events");
-	}
-
-	if (DLOG) Util::log("[ChatServer::wait_for_multiple_events] END\n");
-	return 0;
-}
-
 int ChatServer::handle_connections()
 {
 	if (DLOG)
@@ -142,105 +92,46 @@ int ChatServer::handle_connections()
 		Util::log("[ChatServer::handle_connections] START\n");
 	}
 
-	ACE_HANDLE acceptorHandle = acceptor().get_handle();
-	if (DLOG) Util::log("[ChatServer::handle_connections] acceptor().get_handle()=%d\n", acceptorHandle);
+	auto_ptr<Thread_Args> thread_args(new Thread_Args(this));
 
-	if (DLOG)
-	{
-		Util::log("[ChatServer::handle_connections] BEFORE active_handles_.is_set(acceptorHandle);\n");
-		printHandlesSet(active_handles_, false, "handle_connections");
-	}
-
-	if (active_handles_.is_set(acceptorHandle)) {
-		if (DLOG) Util::log("[ChatServer::handle_connections] active_handles_.is_set(acceptorHandle)=%d\n", acceptorHandle);
-		while (acceptor().accept(packetHandler().peer()) == 0)
-		{
-			ACE_HANDLE peerHandle = packetHandler().peer().get_handle();
-			
-			if (DLOG) Util::log("[ChatServer::handle_connections] master_handle_set_.set_bit() with packetHandler().peer().get_handle()=%d\n", peerHandle);
-			if (DLOG)
-			{
-				Util::log("[ChatServer::handle_connections] BEFORE master_handle_set_.set_bit(peerHandle);\n");
-				printHandlesSet(master_handle_set_, true, "handle_connections");
-			}
-
-			master_handle_set_.set_bit(peerHandle);
-			
-			if (DLOG)
-			{
-				Util::log("[ChatServer::handle_connections] AFTER master_handle_set_.set_bit(peerHandle);\n");
-				printHandlesSet(master_handle_set_, true, "handle_connections");
-			}
-
-		}
-
-		// Remove acceptor handle from further consideration.
-		active_handles_.clr_bit(acceptorHandle);
-		if (DLOG)
-		{
-			Util::log("[ChatServer::handle_connections] AFTER active_handles_.clr_bit(acceptorHandle);\n");
-			printHandlesSet(active_handles_, false, "handle_connections");
-		}
-	}
+	if (acceptor().accept(thread_args->logging_peer_) == -1)
+		return -1;
+	if (ACE_Thread_Manager::instance()->spawn(
+		// Pointer to function entry point.
+		ChatServer::run_svc,
+		// <run_svc> parameter.
+		static_cast<void *> (thread_args.get()),
+		THR_DETACHED | THR_SCOPE_SYSTEM) == -1)
+		return -1;
+	thread_args.release();   // Spawned thread now owns memory
 
 	if (DLOG) Util::log("[ChatServer::handle_connections] END\n");
 	return 0;
 }
 
-int ChatServer::handle_data()
+int ChatServer::handle_data(ACE_SOCK_Stream *client)
 {
 	if (DLOG)
 	{
 		printf("\n");
 		Util::log("[ChatServer::handle_data] START\n");
 	}
-	if (DLOG)
-	{
-		Util::log("[ChatServer::handle_data] BEFORE ACE_Handle_Set_Iterator peer_iterator(active_handles_);\n");
-		printHandlesSet(active_handles_, false, "handle_data");
-	}
 
+	// Place the connection into blocking mode since this
+	// thread isn't doing anything except handling this client.
+	client->disable(ACE_NONBLOCK);
 
-	ACE_Handle_Set_Iterator peer_iterator(active_handles_);
+	PacketHandler handler = PacketHandler(*client);
+		
+	// Keep handling log records until client closes connection
+	// or this thread is asked to cancel itself.
+	ACE_Thread_Manager *mgr = ACE_Thread_Manager::instance();
+	ACE_thread_t me = ACE_Thread::self();
+	while (!mgr->testcancel(me) &&
+		handler.processPacket(*this) != 0)
+		continue;
+	handler.close();
 
-	for (ACE_HANDLE handle; (handle = peer_iterator()) != ACE_INVALID_HANDLE;)
-	{
-		if (DLOG)
-		{
-			Util::log("[ChatServer::handle_data] BEFORE packetHandler().peer().set_handle(handle);\n");
-			printHandlesSet(active_handles_, false, "handle_data");
-			printHandlesSet(master_handle_set_, true, "handle_data");
-		}
-
-		packetHandler().peer().set_handle(handle);
-
-		if (true)
-		{
-			while (packetHandler().processPacket(*this));
-			master_handle_set_.clr_bit(handle);
-			packetHandler().close();
-		}
-		else
-		{
-			int result = packetHandler().processPacket(*this);
-
-			//std::this_thread::sleep_for(std::chrono::milliseconds(1000));
-
-			if (!result) {
-				// Handle connection shutdown or comm failure.
-				master_handle_set_.clr_bit(handle);
-				packetHandler().close();
-			}
-
-		}
-
-		if (DLOG)
-		{
-			Util::log("[ChatServer::handle_data] AFTER master_handle_set_.clr_bit(handle);\n");
-			printHandlesSet(active_handles_, false, "handle_data");
-			printHandlesSet(master_handle_set_, true, "handle_data");
-		}
-	}
 	if (DLOG) Util::log("[ChatServer::handle_data] END\n");
 	return 0;
 }
@@ -259,7 +150,7 @@ void ChatServer::onLogin(Login& login)
 	
 	long code = 0;
 	Status status(code);
-	packetHandler().sendStatus(status);
+	// TODO packetHandler().sendStatus(status);
 }
 
 void ChatServer::printHandlesSet(ACE_Handle_Set& handles, bool master, char* procedure_name)

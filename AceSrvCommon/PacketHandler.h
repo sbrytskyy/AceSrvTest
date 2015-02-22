@@ -16,6 +16,7 @@ class PacketHandler
 {
 public:
 	PacketHandler() {}
+	PacketHandler(const ACE_SOCK_Stream &peer) : m_peer(peer) {}
 	virtual ~PacketHandler() {}
 
 	void sendLogin(Login& login);
