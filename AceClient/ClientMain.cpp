@@ -150,10 +150,9 @@ void runMultyThreadingTest()
 
 	for (int i = 0; i < THREADS_COUNT; i++)
 	{
-		std::cout << "MThTest::sort(): " << i << std::endl;
 		handles[i] = (HANDLE)_beginthreadex(NULL, 0, run, /*(void *)(&data[i])*/ nullptr, 0, &addresses[i]);
 
-		std::cout << "handle[" << i << "]:" << handles[i] << std::endl;
+		Util::log("[runMultyThreadingTest] handle[%d] = %d\n", i, handles[i]);
 
 		/* Wait one second between loops. */
 		//Sleep( 1000L );
@@ -162,12 +161,12 @@ void runMultyThreadingTest()
 	unsigned long waitResult = WaitForMultipleObjects(THREADS_COUNT, handles, true, INFINITE);
 	if ((waitResult >= WAIT_OBJECT_0) && (waitResult <= (WAIT_OBJECT_0 + THREADS_COUNT - 1)))
 	{
-		std::cout << "All threads ended, cleaning up for application exit... waitResult: " << waitResult << std::endl;
+		Util::log("All threads ended, cleaning up for application exit... waitResult: %lu\n", waitResult);
 	}
 	else	// An error occurred
 	{
 		unsigned long status = GetLastError();
-		std::cout << std::endl << "WaitForMultipleObjects failed: " << waitResult << ", GetLastError(): " << status << std::endl;
+		Util::log("WaitForMultipleObjects failed: %lu, GetLastError(): %lu\n", waitResult);
 	}
 
 	for (int i = 0; i < THREADS_COUNT; i++)
