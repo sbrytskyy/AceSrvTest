@@ -14,36 +14,39 @@ int PacketHandler::processPacket(PacketListener& listener)
 {
 	iovec *io_vec = new iovec();
 
-	Util::log("[PacketHandler::processPacket] BEFORE int n = peer().recvv(io_vec);\n");
+	//Util::log("[PacketHandler::processPacket] BEFORE int n = peer().recvv(io_vec);\n");
 
 	int n = peer().recvv(io_vec);
-	Util::log("[PacketHandler::processPacket] AFTER int n = peer().recvv(io_vec); n=%d\n", n);
+	Util::log("[PacketHandler::processPacket] peer().recvv(io_vec) = %d\n", n);
 	if (n > 0)
 	{
-		//ACE_DEBUG((LM_DEBUG, "%m\n"));
-		//Util::dumpMessage(io_vec, 1, true);
+		ACE_DEBUG((LM_DEBUG, "%m\n"));
+		Util::dumpMessage(io_vec, 1, true);
 
 		ACE_InputCDR icdr(io_vec->iov_base, n);
 
-		Header header;
-		icdr >> header;
-
-		switch (header.command())
+		while (true) // TODO
 		{
-		case Header::Command::LOGIN:
+			Header header;
+			icdr >> header;
+
+			switch (header.command())
+			{
+			case Header::Command::LOGIN:
 			{
 				Login login;
 				icdr >> login;
-				// TODO listener.onLogin(login);
+				listener.onLogin(login);
 			}
 			break;
-		case Header::Command::STATUS:
+			case Header::Command::STATUS:
 			{
 				Status status;
 				icdr >> status;
-				// TODO listener.onStatus(status);
+				listener.onStatus(status);
 			}
 			break;
+			}
 		}
 
 		delete[] io_vec->iov_base;

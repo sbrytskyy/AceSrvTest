@@ -24,7 +24,7 @@
 #include "PacketListener.h"
 
 const int MAX_PACKETS = 10;
-const int THREADS_COUNT = 10;
+const int THREADS_COUNT = 1;
 
 class Client : public PacketListener
 {
@@ -80,16 +80,16 @@ void runClient()
 	}
 	Util::log("[Client] Connected... Handle=%d\n", packetHandler.peer().get_handle());
 
-	std::this_thread::sleep_for(std::chrono::milliseconds(5000));
+	//std::this_thread::sleep_for(std::chrono::milliseconds(5000));
 
 	srand(time(NULL));
 	/* generate number between 1 and MAX_PACKETS: */
 	int counter = rand() % MAX_PACKETS + 1;
 
-	for (int i = 0; i < counter; i++)
+	for (int i = 0; i < 3; i++)
 		testSend(packetHandler);
 
-	std::this_thread::sleep_for(std::chrono::milliseconds(10000));
+	//std::this_thread::sleep_for(std::chrono::milliseconds(10000));
 
 	packetHandler.close();
 }

@@ -6,19 +6,16 @@
 #include <ace/CDR_Stream.h>
 #include "ace/Handle_Set.h"
 
-#include "PacketListener.h"
+#include "ServerPacketListener.h"
 #include "PacketHandler.h"
 #include "config.h"
 
-class ChatServer : public PacketListener
+class ChatServer
 {
 public:
 	ChatServer() {}
 	virtual ~ChatServer();
 	int run();
-
-	virtual void onStatus(Status& status);
-	virtual void onLogin(Login& login);
 
 protected:
 

@@ -75,6 +75,7 @@
   <ItemGroup>
     <ClCompile Include="ChatServer.cpp" />
     <ClCompile Include="ServerMain.cpp" />
+    <ClCompile Include="ServerPacketListener.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\AceSrvCommon\AceSrvCommon.vcxproj">
@@ -83,6 +84,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ChatServer.h" />
+    <ClInclude Include="ServerPacketListener.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

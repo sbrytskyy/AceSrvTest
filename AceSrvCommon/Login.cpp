@@ -8,8 +8,9 @@ int operator<< (ACE_OutputCDR &cdr, const Login &Login)
 {
 	cdr << ACE_CDR::Long(Login.pid());
 	
-	cdr << ACE_CDR::Long(Login.name().length());
-	cdr.write_char_array(Login.name().c_str(), Login.name().length());
+	int len = Login.name().length();
+	cdr << ACE_CDR::Long(len);
+	cdr.write_char_array(Login.name().c_str(), len);
 
 	return cdr.good_bit();
 }
