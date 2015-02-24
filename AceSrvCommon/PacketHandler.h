@@ -30,12 +30,14 @@ public:
 private:
 	template<class T> void sendPacket(T& packet, Header::Command command)
 	{
-		ACE_OutputCDR ocdrHeader;
-		Header header(command);
-		ocdrHeader << header;
-
 		ACE_OutputCDR ocdr;
 		ocdr << packet;
+
+		size_t packetLength = ocdr.length();
+
+		ACE_OutputCDR ocdrHeader;
+		Header header(command, packetLength);
+		ocdrHeader << header;
 
 		iovec* io_vec = new iovec[2];
 
@@ -43,7 +45,7 @@ private:
 		io_vec[0].iov_len = ocdrHeader.length();
 
 		io_vec[1].iov_base = ocdr.begin()->rd_ptr();
-		io_vec[1].iov_len = ocdr.length();
+		io_vec[1].iov_len = packetLength;
 
 		//Util::dumpMessage(io_vec, 2, false);
 

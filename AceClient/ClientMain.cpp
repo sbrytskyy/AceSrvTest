@@ -40,23 +40,6 @@ public:
 	}
 };
 
-void test()
-{
-	Header header1(Header::MESSAGE);
-	ACE_OutputCDR ocdr;
-
-	ocdr << header1;
-
-	ACE_InputCDR icdr(ocdr);
-	Header header2;
-
-	std::cout << "1. Header command: " << header2.command() << std::endl;
-
-	icdr >> header2;
-
-	std::cout << "2. Header command: " << header2.command() << std::endl;
-}
-
 void testSend(PacketHandler &packetHandler);
 
 void runClient()
@@ -86,7 +69,7 @@ void runClient()
 	/* generate number between 1 and MAX_PACKETS: */
 	int counter = rand() % MAX_PACKETS + 1;
 
-	for (int i = 0; i < 3; i++)
+	for (int i = 0; i < 10; i++)
 		testSend(packetHandler);
 
 	//std::this_thread::sleep_for(std::chrono::milliseconds(10000));

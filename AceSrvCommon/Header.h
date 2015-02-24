@@ -14,18 +14,21 @@ public:
 	};
 
 	Header() : m_lCommand(-1) {}
-	Header(Header& header) : m_lCommand(header.command()) {}
-	Header(long command) : m_lCommand(command) {}
+	Header(Header& header, size_t packetLength) : m_lCommand(header.command()), m_packetLength(packetLength) {}
+	Header(long command, size_t packetLength) : m_lCommand(command), m_packetLength(packetLength) {}
 	virtual ~Header() {}
 
 	const long command(void) const { return m_lCommand; }
+	const long packetLength(void) const { return m_packetLength; }
 
 private:
 	void command(long command) { m_lCommand = command; }
+	void packetLength(long packetLength) { m_packetLength = packetLength; }
 
 	friend int operator>> (ACE_InputCDR &cdr, Header &header);
 
 	long m_lCommand;
+	size_t m_packetLength;
 };
 
 // iostream operators for Header.
