@@ -10,7 +10,7 @@ int operator<< (ACE_OutputCDR &cdr, const Login &Login)
 	
 	int len = Login.name().length();
 	cdr << ACE_CDR::Long(len);
-	cdr.write_char_array(Login.name().c_str(), len);
+	cdr.write_char_array(Login.name().c_str(), len + 1);
 
 	return cdr.good_bit();
 }

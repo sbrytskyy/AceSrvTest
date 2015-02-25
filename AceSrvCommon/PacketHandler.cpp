@@ -30,7 +30,7 @@ int PacketHandler::processPacket(PacketListener& listener)
 		{
 			size_t left = icdr.length();
 			//Util::log("[PacketHandler::processPacket] left = %d\n", left);
-			if (left == 0) break;
+			if (left <= 1) break;
 
 			Header header;
 			icdr >> header;
