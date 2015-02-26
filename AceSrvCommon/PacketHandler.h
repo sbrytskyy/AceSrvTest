@@ -33,11 +33,14 @@ private:
 		ACE_OutputCDR ocdr;
 		ocdr << packet;
 
+		ocdr.align_write_ptr(ACE_CDR::MAX_ALIGNMENT);
+
 		size_t packetLength = ocdr.length();
 
 		ACE_OutputCDR ocdrHeader;
 		Header header(command, packetLength);
 		ocdrHeader << header;
+		ocdrHeader.align_write_ptr(ACE_CDR::MAX_ALIGNMENT);
 
 		iovec* io_vec = new iovec[2];
 

@@ -82,7 +82,7 @@ static int pidCounter = 0;
 void testSend(PacketHandler &packetHandler)
 {
 	//Login login((long)time(NULL), "uranium");
-	Login login(pidCounter++, "uranium");
+	Login login(pidCounter++, "uran");
 
 	Util::log("[Client] Sending login with pid %d\n", login.pid());
 	packetHandler.sendLogin(login);

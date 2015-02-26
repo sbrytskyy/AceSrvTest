@@ -26,16 +26,15 @@ int PacketHandler::processPacket(PacketListener& listener)
 
 		ACE_InputCDR icdr(io_vec->iov_base, n);
 
-		while (true)
+		bool running = true;
+		while (running)
 		{
 			size_t left = icdr.length();
 			//Util::log("[PacketHandler::processPacket] left = %d\n", left);
-			if (left <= 1) break;
+			if (left <= ACE_CDR::MAX_ALIGNMENT) break;
 
 			Header header;
 			icdr >> header;
-
-			size_t packetLength = header.packetLength();
 
 			switch (header.command())
 			{
@@ -55,8 +54,9 @@ int PacketHandler::processPacket(PacketListener& listener)
 				}
 				default:
 				{
-					ACE_CDR::Boolean skip = icdr.skip_bytes(packetLength);
-					Util::log("[PacketHandler::processPacket] Unknown packet! Command=%d, packetLength=%d, skip=%d\n", header.command(), packetLength, skip);
+					size_t packetLength = header.packetLength();
+					Util::log("[PacketHandler::processPacket] Unknown packet! Abort. Command=%d, packetLength=%d\n", header.command(), packetLength);
+					running = false;
 				}
 			}
 		}
