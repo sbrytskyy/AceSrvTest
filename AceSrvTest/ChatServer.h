@@ -49,7 +49,7 @@ private:
 		Thread_Args(ChatServer *lsp) : this_(lsp) {}
 
 		ChatServer *this_;
-		ACE_SOCK_Stream logging_peer_;
+		ACE_SOCK_Stream m_chat_peer;
 	};
 
 	// Passed as a parameter to <ACE_Thread_Manager::spawn>.

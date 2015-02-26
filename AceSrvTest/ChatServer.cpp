@@ -27,8 +27,8 @@ ACE_THR_FUNC_RETURN ChatServer::run_svc(void *arg)
 {
 	auto_ptr<Thread_Args> thread_args(static_cast<Thread_Args *> (arg));
 
-	thread_args->this_->handle_data(&thread_args->logging_peer_);
-	thread_args->logging_peer_.close();
+	thread_args->this_->handle_data(&thread_args->m_chat_peer);
+	thread_args->m_chat_peer.close();
 	return 0;    // Return value is ignored
 }
 
@@ -94,7 +94,7 @@ int ChatServer::handle_connections()
 
 	auto_ptr<Thread_Args> thread_args(new Thread_Args(this));
 
-	if (acceptor().accept(thread_args->logging_peer_) == -1)
+	if (acceptor().accept(thread_args->m_chat_peer) == -1)
 		return -1;
 	if (ACE_Thread_Manager::instance()->spawn(
 		// Pointer to function entry point.
@@ -124,7 +124,7 @@ int ChatServer::handle_data(ACE_SOCK_Stream *client)
 	PacketHandler handler = PacketHandler(*client);
 	ServerPacketListener spl = ServerPacketListener(handler);
 		
-	// Keep handling log records until client closes connection
+	// Keep handling chat messages until client closes connection
 	// or this thread is asked to cancel itself.
 	ACE_Thread_Manager *mgr = ACE_Thread_Manager::instance();
 	ACE_thread_t me = ACE_Thread::self();
