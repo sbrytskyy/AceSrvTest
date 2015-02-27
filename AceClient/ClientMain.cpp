@@ -23,8 +23,8 @@
 #include "PacketHandler.h"
 #include "PacketListener.h"
 
-const int MAX_PACKETS = 10;
-const int THREADS_COUNT = 1;
+const int MAX_PACKETS = 100;
+const int THREADS_COUNT = 10;
 
 class Client : public PacketListener
 {
@@ -69,7 +69,7 @@ void runClient()
 	/* generate number between 1 and MAX_PACKETS: */
 	int counter = rand() % MAX_PACKETS + 1;
 
-	for (int i = 0; i < 10; i++)
+	for (int i = 0; i < counter; i++)
 		testSend(packetHandler);
 
 	//std::this_thread::sleep_for(std::chrono::milliseconds(10000));
@@ -88,7 +88,7 @@ void testSend(PacketHandler &packetHandler)
 	packetHandler.sendLogin(login);
 
 	Client client;
-	// TODO packetHandler.processPacket(client);
+	packetHandler.processPacket(client);
 	//packetHandler.close();
 }
 

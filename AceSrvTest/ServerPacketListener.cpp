@@ -16,5 +16,5 @@ void ServerPacketListener::onLogin(Login& login)
 
 	long code = 0;
 	Status status(code);
-	//m_handler.sendStatus(status);
+	m_handler.sendStatus(status);
 }
