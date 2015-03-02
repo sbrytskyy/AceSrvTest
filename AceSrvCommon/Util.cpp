@@ -2,6 +2,8 @@
 
 #include <ace/OS_NS_sys_time.h>
 
+ACE_Thread_Mutex Util::mutex;
+
 void Util::dumpMessage(const iovec * io_vec, const size_t size, bool incoming)
 {
 
@@ -46,9 +48,23 @@ void Util::dumpMessage(const iovec * io_vec, const size_t size, bool incoming)
 	std::cout << std::endl;
 }
 
+void Util::debug(const char *pszFormat, ...)
+{
+	if (DLOG)
+	{
+		va_list args;
+		va_start(args, pszFormat);
+		
+		Util::log(args);
+
+		va_end(args);
+	}
+}
 
 void Util::log(const char *pszFormat, ...)
 {
+	mutex.acquire();
+
 	va_list ap;
 
 	//long ms = (long)time(NULL);
@@ -78,5 +94,5 @@ void Util::log(const char *pszFormat, ...)
 
 	va_end(ap);
 
-	
+	mutex.release();
 }

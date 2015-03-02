@@ -17,12 +17,15 @@ int PacketHandler::processPacket(PacketListener& listener)
 	//Util::log("[PacketHandler::processPacket] BEFORE int n = peer().recvv(io_vec);\n");
 
 	int n = peer().recvv(io_vec);
-	Util::log("[PacketHandler::processPacket] peer().recvv(io_vec) = %d\n", n);
+	Util::debug("[PacketHandler::processPacket] peer().recvv(io_vec) = %d\n", n);
 	if (n > 0)
 	{
 		//ACE_ERROR((LM_ERROR, ACE_TEXT("%N:%l: Failed to receive request. (errno = %i: %m)\n"), ACE_ERRNO_GET));
 		//ACE_DEBUG((LM_DEBUG, "Client::receiving_thread:(%P|%t):%d:%m\n", errno));
-		Util::dumpMessage(io_vec, 1, true);
+		if (DLOG)
+		{
+			Util::dumpMessage(io_vec, 1, true);
+		}
 
 		ACE_InputCDR icdr(io_vec->iov_base, n);
 

@@ -1,6 +1,8 @@
 #include <ace/INET_Addr.h>
 #include <ace/SOCK_Connector.h>
 #include <ace/SOCK_Stream.h>
+#include "ace/Signal.h"
+#include "ace/Thread_Manager.h"
 
 #include <conio.h>
 #include <iostream>
@@ -126,7 +128,7 @@ unsigned __stdcall run(void* params)
 	return 0;
 }
 
-void runMultyThreadingTest()
+void runMultyThreadingTest_()
 {
 	HANDLE handles[THREADS_COUNT];
 	unsigned addresses[THREADS_COUNT];
@@ -161,9 +163,49 @@ void runMultyThreadingTest()
 	_getch();
 }
 
+ACE_THR_FUNC_RETURN run_svc(void *arg)
+{
+	runClient();
+	return 0;
+}
+
+void runMultyThreadingTest()
+{
+	ACE_Thread_Manager::instance()->spawn_n(THREADS_COUNT, 
+		// Pointer to function entry point.
+		run_svc,
+		// <runrun_svc> parameter.
+		nullptr,
+		THR_DETACHED | THR_SCOPE_SYSTEM);
+	
+	// Cooperative thread cancellation and barrier synchronization.
+	ACE_Thread_Manager::instance()->cancel_all();
+	unsigned long waitResult = ACE_Thread_Manager::instance()->wait();
+
+	if ((waitResult >= WAIT_OBJECT_0) && (waitResult <= (WAIT_OBJECT_0 + THREADS_COUNT - 1)))
+	{
+		Util::log("All threads ended, cleaning up for application exit... waitResult: %lu\n", waitResult);
+	}
+	else	// An error occurred
+	{
+		unsigned long status = GetLastError();
+		Util::log("WaitForMultipleObjects failed: %lu, GetLastError(): %lu\n", waitResult);
+	}
+
+	Util::log("%s\n", "[Client] press any key to finish");
+	_getch();
+}
+
+namespace {
+	extern "C" void sigterm_handler(int /* signum */) { /* No-op. */ }
+}
+
 int ACE_TMAIN(int, ACE_TCHAR *[])
 {
 	Util::log("%s\n", "[Client] START");
+
+	// Register to receive the <SIGTERM> signal.
+	ACE_Sig_Action sa((ACE_SignalHandler)sigterm_handler, SIGTERM);
 
 	/* initialize random seed: */
 	srand(time(NULL));

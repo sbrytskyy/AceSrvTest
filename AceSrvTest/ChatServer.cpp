@@ -16,7 +16,6 @@
 #include "Status.h"
 #include "Util.h"
 
-#define DLOG false
 
 ChatServer::~ChatServer()
 {
