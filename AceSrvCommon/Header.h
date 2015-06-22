@@ -6,6 +6,8 @@ class Header
 {
 public:
 
+	static const long HEADER_SIZE = 8;
+
 	enum Command 
 	{
 		STATUS = 1,
@@ -13,19 +15,22 @@ public:
 		MESSAGE = 3
 	};
 
-	Header() : m_lCommand(-1) {}
-	Header(Header& header) : m_lCommand(header.command()) {}
-	Header(long command) : m_lCommand(command) {}
+	Header() : m_lCommand(-1), m_lPSize(0) {}
+	Header(Header& header) : m_lCommand(header.command()), m_lPSize(header.psize()) {}
+	Header(long command, long psize) : m_lCommand(command), m_lPSize(psize) {}
 	virtual ~Header() {}
 
 	const long command(void) const { return m_lCommand; }
+	const long psize(void) const { return m_lPSize; }
 
 private:
 	void command(long command) { m_lCommand = command; }
+	void psize(long psize) { m_lPSize = psize; }
 
 	friend int operator>> (ACE_InputCDR &cdr, Header &header);
 
 	long m_lCommand;
+	long m_lPSize;
 };
 
 // iostream operators for Header.

@@ -47,7 +47,7 @@ void Util::dumpMessage(const iovec * io_vec, const size_t size, bool incoming)
 }
 
 
-void Util::log(const char *pszFormat, ...)
+void Util::tlog(const char *pszFormat, ...)
 {
 	va_list ap;
 
@@ -79,4 +79,16 @@ void Util::log(const char *pszFormat, ...)
 	va_end(ap);
 
 	
+}
+
+void Util::log(const char *pszFormat, ...)
+{
+	va_list ap;
+
+	va_start(ap, pszFormat);
+
+	vprintf(pszFormat, ap);
+	//ACE_DEBUG((LM_DEBUG, pszFormat, ap));
+
+	va_end(ap);
 }

@@ -44,7 +44,7 @@ int ChatServer::run()
 
 int ChatServer::open()
 {
-	if (DLOG) printf("\n");
+	if (DLOG) printf("\n\n\n");
 	if (server_addr.set(SERVER_PORT) == EXIT_FAILURE)
 	{
 		ACE_ERROR_RETURN((LM_ERROR, "%p; server port: %n\n", "server_addr.set()", SERVER_PORT), EXIT_FAILURE);
@@ -57,18 +57,18 @@ int ChatServer::open()
 
 	if (DLOG)
 	{
-		Util::log("[ChatServer::open] BEFORE master_handle_set_.set_bit(acceptorHandle);\n");
+		Util::tlog("[ChatServer::open] BEFORE master_handle_set_.set_bit(acceptorHandle);\n");
 		printHandlesSet(master_handle_set_, true, "open");
 	}
 
 	ACE_HANDLE acceptorHandle = acceptor().get_handle();
 	master_handle_set_.set_bit(acceptorHandle);
 
-	if (DLOG) Util::log("[ChatServer::open] master_handle_set_.set_bit() with acceptor().get_handle()=%d\n", acceptorHandle);
+	if (DLOG) Util::tlog("[ChatServer::open] master_handle_set_.set_bit() with acceptor().get_handle()=%d\n", acceptorHandle);
 
 	if (DLOG)
 	{
-		Util::log("[ChatServer::open] AFTER master_handle_set_.set_bit(acceptorHandle);\n");
+		Util::tlog("[ChatServer::open] AFTER master_handle_set_.set_bit(acceptorHandle);\n");
 		printHandlesSet(master_handle_set_, true, "open");
 	}
 
@@ -81,12 +81,12 @@ int ChatServer::wait_for_multiple_events()
 {
 	if (DLOG)
 	{
-		printf("\n");
-		Util::log("[ChatServer::wait_for_multiple_events] START\n");
+		printf("\n\n\n");
+		Util::tlog("[ChatServer::wait_for_multiple_events] START\n");
 	}
 	if (DLOG)
 	{
-		Util::log("[ChatServer::wait_for_multiple_events] BEFORE active_handles_ = master_handle_set_;\n");
+		Util::tlog("[ChatServer::wait_for_multiple_events] BEFORE active_handles_ = master_handle_set_;\n");
 		printHandlesSet(active_handles_, false, "wait_for_multiple_events");
 		printHandlesSet(master_handle_set_, true, "wait_for_multiple_events");
 	}
@@ -95,11 +95,11 @@ int ChatServer::wait_for_multiple_events()
 	int width = ACE_Utils::truncate_cast<int> ((intptr_t)active_handles_.max_set()) + 1;
 	if (DLOG)
 	{
-		Util::log("[ChatServer::wait_for_multiple_events] width=%d\n", width);
+		Util::tlog("[ChatServer::wait_for_multiple_events] width=%d\n", width);
 	}
 	if (DLOG)
 	{
-		Util::log("[ChatServer::wait_for_multiple_events] AFTER active_handles_ = master_handle_set_;\n");
+		Util::tlog("[ChatServer::wait_for_multiple_events] AFTER active_handles_ = master_handle_set_;\n");
 		printHandlesSet(active_handles_, false, "wait_for_multiple_events");
 		printHandlesSet(master_handle_set_, true, "wait_for_multiple_events");
 	}
@@ -111,11 +111,11 @@ int ChatServer::wait_for_multiple_events()
 	if (DLOG)
 	{
 		printf("\n\n");
-		Util::log("[ChatServer::wait_for_multiple_events] SOCKET activity detected!!! Fired select()=%d\n", selected);
+		Util::tlog("[ChatServer::wait_for_multiple_events] SOCKET activity detected!!! Fired select()=%d\n", selected);
 	}
 	if (DLOG)
 	{
-		Util::log("[ChatServer::wait_for_multiple_events] AFTER select(width, active_handles_.fdset()....); \n");
+		Util::tlog("[ChatServer::wait_for_multiple_events] AFTER select(width, active_handles_.fdset()....); \n");
 		printHandlesSet(active_handles_, false, "wait_for_multiple_events");
 	}
 
@@ -126,11 +126,11 @@ int ChatServer::wait_for_multiple_events()
 
 	if (DLOG)
 	{
-		Util::log("[ChatServer::wait_for_multiple_events] AFTER active_handles_.sync(....); \n");
+		Util::tlog("[ChatServer::wait_for_multiple_events] AFTER active_handles_.sync(....); \n");
 		printHandlesSet(active_handles_, false, "wait_for_multiple_events");
 	}
 
-	if (DLOG) Util::log("[ChatServer::wait_for_multiple_events] END\n");
+	if (DLOG) Util::tlog("[ChatServer::wait_for_multiple_events] END\n");
 	return 0;
 }
 
@@ -138,29 +138,29 @@ int ChatServer::handle_connections()
 {
 	if (DLOG)
 	{
-		printf("\n");
-		Util::log("[ChatServer::handle_connections] START\n");
+		printf("\n\n\n");
+		Util::tlog("[ChatServer::handle_connections] START\n");
 	}
 
 	ACE_HANDLE acceptorHandle = acceptor().get_handle();
-	if (DLOG) Util::log("[ChatServer::handle_connections] acceptor().get_handle()=%d\n", acceptorHandle);
+	if (DLOG) Util::tlog("[ChatServer::handle_connections] acceptor().get_handle()=%d\n", acceptorHandle);
 
 	if (DLOG)
 	{
-		Util::log("[ChatServer::handle_connections] BEFORE active_handles_.is_set(acceptorHandle);\n");
+		Util::tlog("[ChatServer::handle_connections] BEFORE active_handles_.is_set(acceptorHandle);\n");
 		printHandlesSet(active_handles_, false, "handle_connections");
 	}
 
 	if (active_handles_.is_set(acceptorHandle)) {
-		if (DLOG) Util::log("[ChatServer::handle_connections] active_handles_.is_set(acceptorHandle)=%d\n", acceptorHandle);
+		if (DLOG) Util::tlog("[ChatServer::handle_connections] active_handles_.is_set(acceptorHandle)=%d\n", acceptorHandle);
 		while (acceptor().accept(packetHandler().peer()) == 0)
 		{
 			ACE_HANDLE peerHandle = packetHandler().peer().get_handle();
 			
-			if (DLOG) Util::log("[ChatServer::handle_connections] master_handle_set_.set_bit() with packetHandler().peer().get_handle()=%d\n", peerHandle);
+			if (DLOG) Util::tlog("[ChatServer::handle_connections] master_handle_set_.set_bit() with packetHandler().peer().get_handle()=%d\n", peerHandle);
 			if (DLOG)
 			{
-				Util::log("[ChatServer::handle_connections] BEFORE master_handle_set_.set_bit(peerHandle);\n");
+				Util::tlog("[ChatServer::handle_connections] BEFORE master_handle_set_.set_bit(peerHandle);\n");
 				printHandlesSet(master_handle_set_, true, "handle_connections");
 			}
 
@@ -168,7 +168,7 @@ int ChatServer::handle_connections()
 			
 			if (DLOG)
 			{
-				Util::log("[ChatServer::handle_connections] AFTER master_handle_set_.set_bit(peerHandle);\n");
+				Util::tlog("[ChatServer::handle_connections] AFTER master_handle_set_.set_bit(peerHandle);\n");
 				printHandlesSet(master_handle_set_, true, "handle_connections");
 			}
 
@@ -178,12 +178,12 @@ int ChatServer::handle_connections()
 		active_handles_.clr_bit(acceptorHandle);
 		if (DLOG)
 		{
-			Util::log("[ChatServer::handle_connections] AFTER active_handles_.clr_bit(acceptorHandle);\n");
+			Util::tlog("[ChatServer::handle_connections] AFTER active_handles_.clr_bit(acceptorHandle);\n");
 			printHandlesSet(active_handles_, false, "handle_connections");
 		}
 	}
 
-	if (DLOG) Util::log("[ChatServer::handle_connections] END\n");
+	if (DLOG) Util::tlog("[ChatServer::handle_connections] END\n");
 	return 0;
 }
 
@@ -191,12 +191,12 @@ int ChatServer::handle_data()
 {
 	if (DLOG)
 	{
-		printf("\n");
-		Util::log("[ChatServer::handle_data] START\n");
+		printf("\n\n\n");
+		Util::tlog("[ChatServer::handle_data] START\n");
 	}
 	if (DLOG)
 	{
-		Util::log("[ChatServer::handle_data] BEFORE ACE_Handle_Set_Iterator peer_iterator(active_handles_);\n");
+		Util::tlog("[ChatServer::handle_data] BEFORE ACE_Handle_Set_Iterator peer_iterator(active_handles_);\n");
 		printHandlesSet(active_handles_, false, "handle_data");
 	}
 
@@ -207,7 +207,7 @@ int ChatServer::handle_data()
 	{
 		if (DLOG)
 		{
-			Util::log("[ChatServer::handle_data] BEFORE packetHandler().peer().set_handle(handle);\n");
+			Util::tlog("[ChatServer::handle_data] BEFORE packetHandler().peer().set_handle(handle);\n");
 			printHandlesSet(active_handles_, false, "handle_data");
 			printHandlesSet(master_handle_set_, true, "handle_data");
 		}
@@ -236,26 +236,26 @@ int ChatServer::handle_data()
 
 		if (DLOG)
 		{
-			Util::log("[ChatServer::handle_data] AFTER master_handle_set_.clr_bit(handle);\n");
+			Util::tlog("[ChatServer::handle_data] AFTER master_handle_set_.clr_bit(handle);\n");
 			printHandlesSet(active_handles_, false, "handle_data");
 			printHandlesSet(master_handle_set_, true, "handle_data");
 		}
 	}
-	if (DLOG) Util::log("[ChatServer::handle_data] END\n");
+	if (DLOG) Util::tlog("[ChatServer::handle_data] END\n");
 	return 0;
 }
 
 void ChatServer::onStatus(Status& status)
 {
 	//std::cout << "[ChatServer::onStatus] status=[code: " << status.code() << "]" << std::endl;
-	Util::log("[ChatServer::onStatus] status=[code: %d]\n", status.code());
+	Util::tlog("[ChatServer::onStatus] status=[code: %d]\n", status.code());
 
 }
 
 void ChatServer::onLogin(Login& login)
 {
 	//std::cout << "[ChatServer::onLogin] login=[pid: " << login.pid() << ", name: " << login.name() << "]" << std::endl;
-	Util::log("[ChatServer::onLogin] login = [pid: %d, name : %s]\n", login.pid(), login.name().c_str());
+	Util::tlog("[ChatServer::onLogin] login = [pid: %d, name : %s]\n", login.pid(), login.name().c_str());
 	
 	long code = 0;
 	Status status(code);
@@ -264,7 +264,7 @@ void ChatServer::onLogin(Login& login)
 
 void ChatServer::printHandlesSet(ACE_Handle_Set& handles, bool master, char* procedure_name)
 {
-	Util::log("%s ACE_Handle_Set %s; called from %s\n", "[ChatServer::printHandlesSet]", (master ? "MASTER" : "ACTIVE"), procedure_name);
+	Util::tlog("%s ACE_Handle_Set %s; called from %s\n", "[ChatServer::printHandlesSet]", (master ? "MASTER" : "ACTIVE"), procedure_name);
 	fd_set * fdset = handles.fdset();
 	if (fdset)
 	{

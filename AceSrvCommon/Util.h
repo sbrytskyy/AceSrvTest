@@ -14,6 +14,7 @@ public:
 	virtual ~Util() {}
 
 	static void dumpMessage(const iovec * io_vec, const size_t size, bool incoming);
+	static void tlog(const char *pszFormat, ...);
 	static void log(const char *pszFormat, ...);
 };
 

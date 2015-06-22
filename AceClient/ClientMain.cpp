@@ -23,8 +23,8 @@
 #include "PacketHandler.h"
 #include "PacketListener.h"
 
-const int MAX_PACKETS = 10;
-const int THREADS_COUNT = 10;
+const int MAX_PACKETS = 1;
+const int THREADS_COUNT = 1;
 
 class Client : public PacketListener
 {
@@ -84,7 +84,9 @@ void runClient()
 
 	srand(time(NULL));
 	/* generate number between 1 and MAX_PACKETS: */
-	int counter = rand() % MAX_PACKETS + 1;
+	//int counter = rand() % MAX_PACKETS + 1;
+
+	int counter = MAX_PACKETS;
 
 	for (int i = 0; i < counter; i++)
 		testSend(packetHandler);

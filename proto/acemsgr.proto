@@ -1,0 +1,19 @@
+package acemsgr;
+
+option java_package = "com.m32s.ace.client";
+
+message Status {
+  enum StatusType {
+    OK = 0;
+    FAILED = 1;
+  }
+
+  required StatusType type = 1 [default = OK];
+}
+
+message Login {
+  required int32 id = 1;
+  required string name = 2;
+  optional string email = 3;
+}
+
