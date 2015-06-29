@@ -44,7 +44,6 @@ int ChatServer::run()
 
 int ChatServer::open()
 {
-	if (DLOG) printf("\n\n\n");
 	if (server_addr.set(SERVER_PORT) == EXIT_FAILURE)
 	{
 		ACE_ERROR_RETURN((LM_ERROR, "%p; server port: %n\n", "server_addr.set()", SERVER_PORT), EXIT_FAILURE);
@@ -55,22 +54,8 @@ int ChatServer::open()
 		ACE_ERROR_RETURN((LM_ERROR, "%p\n", "acceptor.open()"), EXIT_FAILURE);
 	}
 
-	if (DLOG)
-	{
-		Util::tlog("[ChatServer::open] BEFORE master_handle_set_.set_bit(acceptorHandle);\n");
-		printHandlesSet(master_handle_set_, true, "open");
-	}
-
 	ACE_HANDLE acceptorHandle = acceptor().get_handle();
 	master_handle_set_.set_bit(acceptorHandle);
-
-	if (DLOG) Util::tlog("[ChatServer::open] master_handle_set_.set_bit() with acceptor().get_handle()=%d\n", acceptorHandle);
-
-	if (DLOG)
-	{
-		Util::tlog("[ChatServer::open] AFTER master_handle_set_.set_bit(acceptorHandle);\n");
-		printHandlesSet(master_handle_set_, true, "open");
-	}
 
 	acceptor().enable(ACE_NONBLOCK);
 
@@ -79,142 +64,71 @@ int ChatServer::open()
 
 int ChatServer::wait_for_multiple_events()
 {
-	if (DLOG)
-	{
-		printf("\n\n\n");
-		Util::tlog("[ChatServer::wait_for_multiple_events] START\n");
-	}
-	if (DLOG)
-	{
-		Util::tlog("[ChatServer::wait_for_multiple_events] BEFORE active_handles_ = master_handle_set_;\n");
-		printHandlesSet(active_handles_, false, "wait_for_multiple_events");
-		printHandlesSet(master_handle_set_, true, "wait_for_multiple_events");
-	}
-
 	active_handles_ = master_handle_set_;
 	int width = ACE_Utils::truncate_cast<int> ((intptr_t)active_handles_.max_set()) + 1;
-	if (DLOG)
-	{
-		Util::tlog("[ChatServer::wait_for_multiple_events] width=%d\n", width);
-	}
-	if (DLOG)
-	{
-		Util::tlog("[ChatServer::wait_for_multiple_events] AFTER active_handles_ = master_handle_set_;\n");
-		printHandlesSet(active_handles_, false, "wait_for_multiple_events");
-		printHandlesSet(master_handle_set_, true, "wait_for_multiple_events");
-	}
 
 	int selected = ACE::select(width,
 		active_handles_,
 		0);
 
-	if (DLOG)
-	{
-		printf("\n\n");
-		Util::tlog("[ChatServer::wait_for_multiple_events] SOCKET activity detected!!! Fired select()=%d\n", selected);
-	}
-	if (DLOG)
-	{
-		Util::tlog("[ChatServer::wait_for_multiple_events] AFTER select(width, active_handles_.fdset()....); \n");
-		printHandlesSet(active_handles_, false, "wait_for_multiple_events");
-	}
-
 	if (selected == SOCKET_ERROR) // no timeout
 		return SOCKET_ERROR;
+
 	active_handles_.sync
 		((ACE_HANDLE)((intptr_t)active_handles_.max_set() + 1));
 
-	if (DLOG)
-	{
-		Util::tlog("[ChatServer::wait_for_multiple_events] AFTER active_handles_.sync(....); \n");
-		printHandlesSet(active_handles_, false, "wait_for_multiple_events");
-	}
-
-	if (DLOG) Util::tlog("[ChatServer::wait_for_multiple_events] END\n");
 	return 0;
 }
 
 int ChatServer::handle_connections()
 {
-	if (DLOG)
-	{
-		printf("\n\n\n");
-		Util::tlog("[ChatServer::handle_connections] START\n");
-	}
-
 	ACE_HANDLE acceptorHandle = acceptor().get_handle();
-	if (DLOG) Util::tlog("[ChatServer::handle_connections] acceptor().get_handle()=%d\n", acceptorHandle);
-
-	if (DLOG)
-	{
-		Util::tlog("[ChatServer::handle_connections] BEFORE active_handles_.is_set(acceptorHandle);\n");
-		printHandlesSet(active_handles_, false, "handle_connections");
-	}
 
 	if (active_handles_.is_set(acceptorHandle)) {
-		if (DLOG) Util::tlog("[ChatServer::handle_connections] active_handles_.is_set(acceptorHandle)=%d\n", acceptorHandle);
 		while (acceptor().accept(packetHandler().peer()) == 0)
 		{
 			ACE_HANDLE peerHandle = packetHandler().peer().get_handle();
-			
-			if (DLOG) Util::tlog("[ChatServer::handle_connections] master_handle_set_.set_bit() with packetHandler().peer().get_handle()=%d\n", peerHandle);
-			if (DLOG)
-			{
-				Util::tlog("[ChatServer::handle_connections] BEFORE master_handle_set_.set_bit(peerHandle);\n");
-				printHandlesSet(master_handle_set_, true, "handle_connections");
-			}
-
 			master_handle_set_.set_bit(peerHandle);
-			
-			if (DLOG)
-			{
-				Util::tlog("[ChatServer::handle_connections] AFTER master_handle_set_.set_bit(peerHandle);\n");
-				printHandlesSet(master_handle_set_, true, "handle_connections");
-			}
-
 		}
 
 		// Remove acceptor handle from further consideration.
 		active_handles_.clr_bit(acceptorHandle);
-		if (DLOG)
-		{
-			Util::tlog("[ChatServer::handle_connections] AFTER active_handles_.clr_bit(acceptorHandle);\n");
-			printHandlesSet(active_handles_, false, "handle_connections");
-		}
 	}
 
-	if (DLOG) Util::tlog("[ChatServer::handle_connections] END\n");
 	return 0;
 }
 
 int ChatServer::handle_data()
 {
-	if (DLOG)
-	{
-		printf("\n\n\n");
-		Util::tlog("[ChatServer::handle_data] START\n");
-	}
-	if (DLOG)
-	{
-		Util::tlog("[ChatServer::handle_data] BEFORE ACE_Handle_Set_Iterator peer_iterator(active_handles_);\n");
-		printHandlesSet(active_handles_, false, "handle_data");
-	}
-
-
 	ACE_Handle_Set_Iterator peer_iterator(active_handles_);
 
 	for (ACE_HANDLE handle; (handle = peer_iterator()) != ACE_INVALID_HANDLE;)
 	{
-		if (DLOG)
-		{
-			Util::tlog("[ChatServer::handle_data] BEFORE packetHandler().peer().set_handle(handle);\n");
-			printHandlesSet(active_handles_, false, "handle_data");
-			printHandlesSet(master_handle_set_, true, "handle_data");
-		}
-
 		packetHandler().peer().set_handle(handle);
 
-		if (true)
+		// TODO read data and store into map Handle/Data
+
+		iovec *io_vec = new iovec();
+		ssize_t bytesRead = packetHandler().peer().recvv(io_vec);
+
+		Util::dumpMessage(io_vec, 1, true);
+		buffer.insert(buffer.end(), io_vec->iov_base, io_vec->iov_base + bytesRead);
+
+		delete[] io_vec->iov_base;
+		delete io_vec;
+
+		if (bytesRead == 0)
+		{
+			master_handle_set_.clr_bit(handle);
+			packetHandler().close(); 
+		}
+
+
+		// TODO check. Call should be when closing connection to client
+		//master_handle_set_.clr_bit(handle);
+		//packetHandler().close(); 
+
+/*		if (true)
 		{
 			while (packetHandler().processPacket(*this));
 			master_handle_set_.clr_bit(handle);
@@ -226,22 +140,16 @@ int ChatServer::handle_data()
 
 			//std::this_thread::sleep_for(std::chrono::milliseconds(1000));
 
-			if (!result) {
+			if (!result) 
+			{
 				// Handle connection shutdown or comm failure.
 				master_handle_set_.clr_bit(handle);
 				packetHandler().close();
 			}
 
-		}
-
-		if (DLOG)
-		{
-			Util::tlog("[ChatServer::handle_data] AFTER master_handle_set_.clr_bit(handle);\n");
-			printHandlesSet(active_handles_, false, "handle_data");
-			printHandlesSet(master_handle_set_, true, "handle_data");
-		}
+		}*/
 	}
-	if (DLOG) Util::tlog("[ChatServer::handle_data] END\n");
+
 	return 0;
 }
 
@@ -257,6 +165,16 @@ void ChatServer::onLogin(Login& login)
 	//std::cout << "[ChatServer::onLogin] login=[pid: " << login.pid() << ", name: " << login.name() << "]" << std::endl;
 	Util::tlog("[ChatServer::onLogin] login = [pid: %d, name : %s]\n", login.pid(), login.name().c_str());
 	
+	long code = 0;
+	Status status(code);
+	packetHandler().sendStatus(status);
+}
+
+void ChatServer::onLogin(acemsgr::Login& login)
+{
+	//std::cout << "[ChatServer::onLogin] login=[pid: " << login.pid() << ", name: " << login.name() << "]" << std::endl;
+	Util::tlog("[ChatServer::onLogin] login = [pid: %d, name : %s]\n", login.id(), login.name().c_str());
+
 	long code = 0;
 	Status status(code);
 	packetHandler().sendStatus(status);

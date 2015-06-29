@@ -19,6 +19,7 @@ public:
 
 	virtual void onStatus(Status& status);
 	virtual void onLogin(Login& login);
+	virtual void onLogin(acemsgr::Login& login);
 
 	PacketHandler& packetHandler() { return m_packetHandler; }
 
@@ -40,6 +41,9 @@ protected:
 	ACE_SOCK_Acceptor& acceptor() { return m_acceptor; }
 
 private:
+	typedef std::vector<char> buffer_type;
+	buffer_type buffer;
+
 	int open();
 
 	void extractMessageBlock(ACE_InputCDR& icdr);

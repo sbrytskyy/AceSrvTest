@@ -13,23 +13,26 @@ void PacketHandler::sendStatus(Status& status)
 
 int PacketHandler::processPacket(PacketListener& listener)
 {
-	iovec *io_vec = new iovec();
+	Util::tlog("[PacketHandler::processPacket] BEFORE reading socket;\n");
 
-	Util::tlog("[PacketHandler::processPacket] BEFORE int n = peer().recvv(io_vec);\n");
+	char* header = new char[Header::HEADER_SIZE];
 
-	int n = peer().recvv(io_vec);
+	long n = peer().recv(header, Header::HEADER_SIZE);
 
-	Util::tlog("[PacketHandler::processPacket] AFTER int n = peer().recvv(io_vec); n=%d\n", n);
+	Util::tlog("[PacketHandler::processPacket] AFTER reading socket; n=%d\n", n);
 
-	ACE_DEBUG((LM_DEBUG, "%m\n"));
-	Util::dumpMessage(io_vec, 1, true);
+	//ACE_DEBUG((LM_DEBUG, "%m\n"));
+	//Util::dumpMessage(io_vec, 1, true);
 
 	if (n > 0)
 	{
-		ACE_InputCDR icdr(io_vec->iov_base, n, ACE_CDR::BYTE_ORDER_BIG_ENDIAN);
+		ACE_InputCDR icdr(header, n, ACE_CDR::BYTE_ORDER_BIG_ENDIAN);
 
 		Header header;
 		icdr >> header;
+
+		char* body = new char[header.psize()];
+		long n = peer().recv(body, header.psize());
 
 		switch (header.command())
 		{
@@ -40,7 +43,7 @@ int PacketHandler::processPacket(PacketListener& listener)
 				listener.onLogin(login);*/
 
 				acemsgr::Login login;
-				if (login.ParseFromArray(io_vec->iov_base + Header::HEADER_SIZE, header.psize()))
+				if (login.ParseFromArray(body, header.psize()))
 				{
 					// TODO onLogin
 					Util::log("\n\n\n");
@@ -49,6 +52,8 @@ int PacketHandler::processPacket(PacketListener& listener)
 						Util::log(", E-mail address='%s'", login.email().c_str());
 					}
 					Util::log("]\n\n\n");
+
+					listener.onLogin(login);
 				}
 			}
 			break;
@@ -61,11 +66,14 @@ int PacketHandler::processPacket(PacketListener& listener)
 			break;
 		}
 
+		delete[] body;
+
 /*		*/
 	}
 
-	delete[] io_vec->iov_base;
-	delete io_vec;
+	//delete[] io_vec->iov_base;
+	delete[] header;
+	//delete io_vec;
 
 	return n;
 }
