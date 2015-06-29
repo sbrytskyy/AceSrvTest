@@ -8,6 +8,7 @@ import java.net.InetAddress;
 import java.net.Socket;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
+import java.util.Date;
 
 import com.m32s.ace.client.Acemsgr.Login;
 
@@ -81,12 +82,33 @@ public class Client {
 		int pSize = bos.size();
 		
 		os.writeInt(command);
-		os.writeInt(pSize);
-		bos.writeTo(os);
-		
 		os.flush();
+		System.out.println("write command, " + new Date());
 
-		// TODO read
+		try {
+			Thread.sleep(1000);
+		} catch (InterruptedException e) {
+		}
+		
+		os.writeInt(pSize);
+		os.flush();
+		System.out.println("write pSize, " + new Date());
+		
+		try {
+			Thread.sleep(1000);
+		} catch (InterruptedException e) {
+		}
+
+		bos.writeTo(os);
+		os.flush();
+		System.out.println("write body, " + new Date());
+
+		byte[] b = new byte[1024];
+    	int read = is.read(b);
+    	System.out.println("read: " + read );
+        
+        String response = byteArrayTohexString(b, 0, read);
+        System.out.println("response: [" + response + "]");
 		
 		os.close();
 		is.close();
