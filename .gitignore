@@ -8,3 +8,5 @@
 /thirdparty/protobuf-2.6.1/vsprojects/*.sdf
 /thirdparty/protobuf-2.6.1/vsprojects/*.suo
 /thirdparty/protobuf-2.6.1/vsprojects/*.user
+/AceJClient/bin
+/workspace

@@ -88,6 +88,16 @@ int ChatServer::handle_connections()
 		while (acceptor().accept(packetHandler().peer()) == 0)
 		{
 			ACE_HANDLE peerHandle = packetHandler().peer().get_handle();
+
+/*			ACE_FILE_IO *log_file = new ACE_FILE_IO;
+
+			// Use the client's hostname as the logfile name.
+			make_log_file(*log_file, &logging_peer);
+
+			// Add the new <logging_peer>'s handle to the map and
+			// to the set of handles we <select> for input.
+			log_map_.bind(logging_peer.get_handle(), log_file);
+*/
 			master_handle_set_.set_bit(peerHandle);
 		}
 
@@ -112,7 +122,14 @@ int ChatServer::handle_data()
 		ssize_t bytesRead = packetHandler().peer().recvv(io_vec);
 
 		Util::dumpMessage(io_vec, 1, true);
-		buffer.insert(buffer.end(), io_vec->iov_base, io_vec->iov_base + bytesRead);
+
+		// TODO add to buffer per handle
+		//buffer.insert(buffer.end(), io_vec->iov_base, io_vec->iov_base + bytesRead);
+
+		/*
+			  ACE_FILE_IO *log_file = 0;
+			  log_map_.find (handle, log_file);
+		*/
 
 		delete[] io_vec->iov_base;
 		delete io_vec;
@@ -120,6 +137,12 @@ int ChatServer::handle_data()
 		if (bytesRead == 0)
 		{
 			master_handle_set_.clr_bit(handle);
+
+			/*
+					log_map_.unbind (handle);
+					log_file->close ();
+			*/
+
 			packetHandler().close(); 
 		}
 

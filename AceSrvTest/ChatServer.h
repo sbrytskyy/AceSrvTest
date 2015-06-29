@@ -4,11 +4,16 @@
 #include <ace/INET_Addr.h>
 #include <ace/SOCK_Acceptor.h>
 #include <ace/CDR_Stream.h>
+#include <ace/Hash_Map_Manager.h>
+
 #include "ace/Handle_Set.h"
 
 #include "PacketListener.h"
 #include "PacketHandler.h"
 #include "config.h"
+
+typedef std::vector<char> BUFFER_TYPE;
+typedef ACE_Hash_Map_Manager<ACE_HANDLE, BUFFER_TYPE, ACE_SYNCH_RW_MUTEX> BUFFER_MAP;
 
 class ChatServer : public PacketListener
 {
@@ -41,8 +46,7 @@ protected:
 	ACE_SOCK_Acceptor& acceptor() { return m_acceptor; }
 
 private:
-	typedef std::vector<char> buffer_type;
-	buffer_type buffer;
+	BUFFER_MAP buffers;
 
 	int open();
 
