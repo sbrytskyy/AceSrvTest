@@ -89,15 +89,12 @@ int ChatServer::handle_connections()
 		{
 			ACE_HANDLE peerHandle = packetHandler().peer().get_handle();
 
-/*			ACE_FILE_IO *log_file = new ACE_FILE_IO;
+			BUFFER_TYPE buffer;
+			//buffers.bind(peerHandle, buffer);
+			buffers[peerHandle] = buffer;
 
-			// Use the client's hostname as the logfile name.
-			make_log_file(*log_file, &logging_peer);
+			Util::tlog("[handle_connections] HANDLE=%d, data size=%d \n", peerHandle, buffer.size());
 
-			// Add the new <logging_peer>'s handle to the map and
-			// to the set of handles we <select> for input.
-			log_map_.bind(logging_peer.get_handle(), log_file);
-*/
 			master_handle_set_.set_bit(peerHandle);
 		}
 
@@ -123,13 +120,13 @@ int ChatServer::handle_data()
 
 		Util::dumpMessage(io_vec, 1, true);
 
-		// TODO add to buffer per handle
-		//buffer.insert(buffer.end(), io_vec->iov_base, io_vec->iov_base + bytesRead);
+		BUFFER_TYPE& buffer = buffers[handle];
+		//buffers.find(handle, buffer);
+		Util::tlog("[handle_data] find buffer HANDLE=%d, data size=%d \n", handle, buffer.size());
 
-		/*
-			  ACE_FILE_IO *log_file = 0;
-			  log_map_.find (handle, log_file);
-		*/
+		buffer.insert(buffer.end(), io_vec->iov_base, io_vec->iov_base + bytesRead);
+		//buffer.enqueue_tail('a');
+		Util::tlog("[handle_data] after insert HANDLE=%d, data size=%d \n", handle, buffer.size());
 
 		delete[] io_vec->iov_base;
 		delete io_vec;
@@ -138,14 +135,16 @@ int ChatServer::handle_data()
 		{
 			master_handle_set_.clr_bit(handle);
 
-			/*
-					log_map_.unbind (handle);
-					log_file->close ();
-			*/
+			Util::tlog("[handle_data] CLEAR buffer HANDLE=%d \n", handle);
+
+			buffer.clear();
+			buffers.erase(handle);
+
+			//buffer.reset();
+			//buffers.unbind(handle);
 
 			packetHandler().close(); 
 		}
-
 
 		// TODO check. Call should be when closing connection to client
 		//master_handle_set_.clr_bit(handle);
@@ -224,3 +223,29 @@ void ChatServer::printHandlesSet(ACE_Handle_Set& handles, bool master, char* pro
 	}
 }
 
+typedef ACE_Hash_Map_Manager<int, ACE_Unbounded_Queue<char>, ACE_SYNCH_RW_MUTEX> BUFFER_MAP_TEST;
+typedef ACE_Unbounded_Queue<char> BUFFER_TYPE_TEST;
+
+int ChatServer::test()
+{
+	BUFFER_MAP_TEST map;
+
+	BUFFER_TYPE_TEST buffer;
+
+	for (char c = 33; c < 87; c++){
+		buffer.enqueue_tail(c);
+	}
+
+	map.bind(1, buffer);
+
+
+	BUFFER_TYPE_TEST buffer2;
+	map.find(1, buffer2);
+
+	Util::tlog("vector size=%d\n", buffer2.size());
+
+	char c = 0;
+	std::cin >> c;
+
+	return 0;
+}

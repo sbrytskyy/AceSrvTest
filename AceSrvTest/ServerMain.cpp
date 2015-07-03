@@ -11,5 +11,7 @@ int ACE_TMAIN(int, ACE_TCHAR *[])
 	ChatServer chatServer;
 	chatServer.run();
 
+	//chatServer.test();
+
 	return EXIT_SUCCESS;
 }
