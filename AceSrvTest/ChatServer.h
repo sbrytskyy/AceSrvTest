@@ -15,11 +15,8 @@
 #include "PacketHandler.h"
 #include "config.h"
 
-//typedef ACE_Unbounded_Queue<char> BUFFER_TYPE;
-//typedef ACE_Hash_Map_Manager<ACE_HANDLE, BUFFER_TYPE, ACE_SYNCH_RW_MUTEX> BUFFER_MAP;
-
-typedef std::vector<char> BUFFER_TYPE;
-typedef std::map<ACE_HANDLE, BUFFER_TYPE> BUFFER_MAP;
+typedef ACE_Unbounded_Queue<char> BUFFER_TYPE;
+typedef ACE_Hash_Map_Manager<ACE_HANDLE, BUFFER_TYPE *, ACE_SYNCH_RW_MUTEX> BUFFER_MAP;
 
 class ChatServer : public PacketListener
 {

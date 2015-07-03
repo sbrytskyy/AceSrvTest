@@ -89,11 +89,10 @@ int ChatServer::handle_connections()
 		{
 			ACE_HANDLE peerHandle = packetHandler().peer().get_handle();
 
-			BUFFER_TYPE buffer;
-			//buffers.bind(peerHandle, buffer);
-			buffers[peerHandle] = buffer;
+			BUFFER_TYPE* buffer = new BUFFER_TYPE;
+			buffers.bind(peerHandle, buffer);
 
-			Util::tlog("[handle_connections] HANDLE=%d, data size=%d \n", peerHandle, buffer.size());
+			Util::tlog("[handle_connections] HANDLE=%d, data size=%d \n", peerHandle, buffer->size());
 
 			master_handle_set_.set_bit(peerHandle);
 		}
@@ -113,20 +112,25 @@ int ChatServer::handle_data()
 	{
 		packetHandler().peer().set_handle(handle);
 
-		// TODO read data and store into map Handle/Data
-
 		iovec *io_vec = new iovec();
 		ssize_t bytesRead = packetHandler().peer().recvv(io_vec);
 
 		Util::dumpMessage(io_vec, 1, true);
 
-		BUFFER_TYPE& buffer = buffers[handle];
-		//buffers.find(handle, buffer);
-		Util::tlog("[handle_data] find buffer HANDLE=%d, data size=%d \n", handle, buffer.size());
+		BUFFER_TYPE *buffer;
+		buffers.find(handle, buffer);
+		Util::tlog("[handle_data] find buffer HANDLE=%d, data size=%d \n", handle, buffer->size());
 
-		buffer.insert(buffer.end(), io_vec->iov_base, io_vec->iov_base + bytesRead);
-		//buffer.enqueue_tail('a');
-		Util::tlog("[handle_data] after insert HANDLE=%d, data size=%d \n", handle, buffer.size());
+		//buffer.insert(buffer.end(), io_vec->iov_base, io_vec->iov_base + bytesRead);
+		//buffer->enqueue_tail('a');
+		char* c = io_vec->iov_base;
+		while (c < io_vec->iov_base + bytesRead)
+		{
+			buffer->enqueue_tail(*c);
+			c++;
+		}
+
+		Util::tlog("[handle_data] after insert HANDLE=%d, data size=%d \n", handle, buffer->size());
 
 		delete[] io_vec->iov_base;
 		delete io_vec;
@@ -137,11 +141,9 @@ int ChatServer::handle_data()
 
 			Util::tlog("[handle_data] CLEAR buffer HANDLE=%d \n", handle);
 
-			buffer.clear();
-			buffers.erase(handle);
-
-			//buffer.reset();
-			//buffers.unbind(handle);
+			buffer->reset();
+			delete buffer;
+			buffers.unbind(handle);
 
 			packetHandler().close(); 
 		}
@@ -223,29 +225,7 @@ void ChatServer::printHandlesSet(ACE_Handle_Set& handles, bool master, char* pro
 	}
 }
 
-typedef ACE_Hash_Map_Manager<int, ACE_Unbounded_Queue<char>, ACE_SYNCH_RW_MUTEX> BUFFER_MAP_TEST;
-typedef ACE_Unbounded_Queue<char> BUFFER_TYPE_TEST;
-
 int ChatServer::test()
 {
-	BUFFER_MAP_TEST map;
-
-	BUFFER_TYPE_TEST buffer;
-
-	for (char c = 33; c < 87; c++){
-		buffer.enqueue_tail(c);
-	}
-
-	map.bind(1, buffer);
-
-
-	BUFFER_TYPE_TEST buffer2;
-	map.find(1, buffer2);
-
-	Util::tlog("vector size=%d\n", buffer2.size());
-
-	char c = 0;
-	std::cin >> c;
-
 	return 0;
 }

@@ -9,6 +9,7 @@ import java.net.Socket;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.Date;
+import java.util.Random;
 
 import com.m32s.ace.client.Acemsgr.Login;
 
@@ -68,6 +69,8 @@ public class Client {
 	
 	private void sendTestProtoData() throws IOException {
 
+		Random r = new Random();
+		
 		ByteArrayOutputStream bos = new ByteArrayOutputStream();
 		
 		int id = 1;
@@ -86,7 +89,7 @@ public class Client {
 		System.out.println("write command, " + new Date());
 
 		try {
-			Thread.sleep(1000);
+			Thread.sleep(r.nextInt(2000));
 		} catch (InterruptedException e) {
 		}
 		
@@ -95,7 +98,7 @@ public class Client {
 		System.out.println("write pSize, " + new Date());
 		
 		try {
-			Thread.sleep(1000);
+			Thread.sleep(r.nextInt(2000));
 		} catch (InterruptedException e) {
 		}
 
