@@ -24,7 +24,6 @@ public:
 	ChatServer() {}
 	virtual ~ChatServer();
 	int run();
-	int test();
 
 	virtual void onStatus(Status& status);
 	virtual void onLogin(Login& login);
@@ -52,6 +51,7 @@ protected:
 private:
 	BUFFER_MAP buffers;
 
+	int test();
 	int open();
 
 	void extractMessageBlock(ACE_InputCDR& icdr);

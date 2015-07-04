@@ -26,6 +26,9 @@ ChatServer::~ChatServer()
 
 int ChatServer::run()
 {
+	if (this->test() == EXIT_FAILURE)
+		return EXIT_FAILURE;
+
 	if (this->open())
 		return EXIT_FAILURE;
 
@@ -227,5 +230,8 @@ void ChatServer::printHandlesSet(ACE_Handle_Set& handles, bool master, char* pro
 
 int ChatServer::test()
 {
-	return 0;
+	ACE_Message_Block mb;
+
+
+	return EXIT_FAILURE;
 }
