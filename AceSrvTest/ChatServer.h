@@ -15,7 +15,7 @@
 #include "PacketHandler.h"
 #include "config.h"
 
-typedef ACE_Unbounded_Queue<char> BUFFER_TYPE;
+typedef ACE_Message_Block BUFFER_TYPE;
 typedef ACE_Hash_Map_Manager<ACE_HANDLE, BUFFER_TYPE *, ACE_SYNCH_RW_MUTEX> BUFFER_MAP;
 
 class ChatServer : public PacketListener

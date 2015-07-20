@@ -26,8 +26,8 @@ ChatServer::~ChatServer()
 
 int ChatServer::run()
 {
-	if (this->test() == EXIT_FAILURE)
-		return EXIT_FAILURE;
+// 	if (this->test() == EXIT_FAILURE)
+// 		return EXIT_FAILURE;
 
 	if (this->open())
 		return EXIT_FAILURE;
@@ -92,7 +92,9 @@ int ChatServer::handle_connections()
 		{
 			ACE_HANDLE peerHandle = packetHandler().peer().get_handle();
 
-			BUFFER_TYPE* buffer = new BUFFER_TYPE;
+			BUFFER_TYPE* buffer;
+			ACE_NEW_RETURN(buffer, ACE_Message_Block(1024), -1);
+
 			buffers.bind(peerHandle, buffer);
 
 			Util::tlog("[handle_connections] HANDLE=%d, data size=%d \n", peerHandle, buffer->size());
@@ -118,6 +120,8 @@ int ChatServer::handle_data()
 		iovec *io_vec = new iovec();
 		ssize_t bytesRead = packetHandler().peer().recvv(io_vec);
 
+		// TODO add check if bytesRead > typical message size, proceed message
+
 		Util::dumpMessage(io_vec, 1, true);
 
 		BUFFER_TYPE *buffer;
@@ -125,15 +129,16 @@ int ChatServer::handle_data()
 		Util::tlog("[handle_data] find buffer HANDLE=%d, data size=%d \n", handle, buffer->size());
 
 		//buffer.insert(buffer.end(), io_vec->iov_base, io_vec->iov_base + bytesRead);
-		//buffer->enqueue_tail('a');
-		char* c = io_vec->iov_base;
-		while (c < io_vec->iov_base + bytesRead)
+		if (buffer->space() >= bytesRead)
 		{
-			buffer->enqueue_tail(*c);
-			c++;
+			buffer->copy(io_vec->iov_base, bytesRead);
 		}
+		else {
+			// TODO process buffer. Some message must be ready
+		}
+		
 
-		Util::tlog("[handle_data] after insert HANDLE=%d, data size=%d \n", handle, buffer->size());
+		Util::tlog("[handle_data] after insert HANDLE=%d, data size=%d \n", handle, buffer->size() - buffer->space());
 
 		delete[] io_vec->iov_base;
 		delete io_vec;
@@ -230,8 +235,14 @@ void ChatServer::printHandlesSet(ACE_Handle_Set& handles, bool master, char* pro
 
 int ChatServer::test()
 {
-	ACE_Message_Block mb;
+	ACE_Message_Block *mblk = new ACE_Message_Block(BUFSIZ);
 
+	ssize_t nbytes = ACE::read_n(ACE_STDIN,
+		mblk->wr_ptr(),
+		mblk->size());
+	
+	if (nbytes <= 0)
+		Util::tlog("Nothing is read from STDIN \n"); // Break out at EOF or error.
 
 	return EXIT_FAILURE;
 }
